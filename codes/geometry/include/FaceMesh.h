@@ -41,19 +41,21 @@ public:
     RealField xfc, yfc, zfc;
     RealField xfn, yfn, zfn;
     RealField area;
+    RealField a1, a2, a3;
     RealField vfx, vfy, vfz;
     RealField vfn;
+    RealField fl, fr;
 public:
     UInt GetNFace();
-    UInt CalcTotalFaceNodes();
+	UInt CalcTotalFaceNodes();
     UInt GetNBFace();
     void SetNBFace( UInt nBFace );
-    void CalcFaceNormal1D( NodeMesh * nodeMesh, CellMesh * cellMesh );
-    void CalcFaceCenter1D( NodeMesh * nodeMesh );
-    void CalcFaceNormal2D( NodeMesh * nodeMesh );
-    void CalcFaceCenter2D( NodeMesh * nodeMesh );
-    void CalcFaceNormal3D( NodeMesh * nodeMesh );
-    void CalcFaceCenter3D( NodeMesh * nodeMesh );
+	void CalcFaceNormal1D(NodeMesh * nodeMesh, CellMesh * cellMesh);
+	void CalcFaceCenter1D(NodeMesh * nodeMesh);
+	void CalcFaceNormal2D(NodeMesh * nodeMesh);
+	void CalcFaceCenter2D(NodeMesh * nodeMesh);
+	void CalcFaceNormal3D(NodeMesh * nodeMesh);
+	void CalcFaceCenter3D(NodeMesh * nodeMesh);
 
     void AllocateMetrics();
 };

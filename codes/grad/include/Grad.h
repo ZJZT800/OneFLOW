@@ -35,14 +35,15 @@ public:
 public:
     int nEqu;
     MRField * q;
+	MRField * qf;
     MRField * dqdx, * dqdy, * dqdz;
     MRField * bdqdx, * bdqdy, * bdqdz;
     string name, namex, namey, namez;
     int istore;
 public:
     virtual void Init(){};
-    void CalcGrad();
-    void CalcGradDebug();
+	void CalcGrad();
+	void CalcGradDebug();
     void SwapBcGrad();
     void StoreBcGrad();
 };

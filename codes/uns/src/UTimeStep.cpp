@@ -319,7 +319,6 @@ void UTimeStep::PrepareData()
 
     nscom.gama1 = ( * unsf.gama  )[ 0 ][ ug.lc ];
     nscom.gama2 = ( * unsf.gama  )[ 0 ][ ug.rc ];
-    nscom.gama  = half * ( nscom.gama1 + nscom.gama2 );
 }
 
 void UTimeStep::PrepareVisData()

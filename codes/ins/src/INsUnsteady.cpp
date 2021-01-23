@@ -44,7 +44,7 @@ INsUsdData::~INsUsdData()
 
 void INsUsdData::Init()
 {
-    this->InitSub( nscom.nTEqu );
+    this->InitSub( inscom.nTEqu );
 }
 
 

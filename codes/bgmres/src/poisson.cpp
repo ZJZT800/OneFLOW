@@ -18,7 +18,7 @@ Poisson::Poisson(int number, int ranknumber)
     N  = number;
 	L  = ranknumber;
 	A  = ArrayUtils<double>::onetensor(number);
-	IA = ArrayUtils<int>::onetensor(number);
+	IA = ArrayUtils<int>::onetensor(ranknumber + 1);
 	JA = ArrayUtils<int>::onetensor(number);
 	coeMatrix(A,IA,JA);  //按行存储方法
 }
@@ -29,7 +29,7 @@ Poisson::Poisson(const Poisson& oldCopy)
     N  = oldCopy.getN();
 	L  = oldCopy.getL();
 	A  = ArrayUtils<double>::onetensor(N);
-	IA = ArrayUtils<int>::onetensor(N);
+	IA = ArrayUtils<int>::onetensor(L + 1);
 	JA = ArrayUtils<int>::onetensor(N);
 }
 
@@ -46,7 +46,7 @@ double& Poisson::operator()(int row)
 }
 
 /**
- * Corresponding coematrix compression function
+ * 对应coeMatrix压缩函数
 */
 Solution Poisson::operator*(class Solution vector)
 {

@@ -83,6 +83,8 @@ private:
     void CalcFaceNormal2D();
     void CalcFaceCenter2D();
     void CalcCellCenterVol2D();
+	void CalcFaceWeight2D();
+
 private:
     void CalcFaceNormal3D();
     void CalcFaceCenter3D();

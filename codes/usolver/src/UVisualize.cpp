@@ -111,17 +111,17 @@ BcVisual::~BcVisual()
     ;
 }
 
-void BcVisual::Calc( int bcType )
+void BcVisual::Calc(int bcType)
 {
-    UnsGrid * grid = Zone::GetUnsGrid();
+	UnsGrid * grid = Zone::GetUnsGrid();
 
-    this->Calcf2n( bcType );
+	this->Calcf2n(bcType);
 
-    e2n.resize( 0 );
-    lcell.resize( 0 );
-    rcell.resize( 0 );
+	e2n.resize(0);
+	lcell.resize(0);
+	rcell.resize(0);
 
-    ResolveElementEdge();
+	ResolveElementEdge();
 }
 
 void BcVisual::ResolveElementEdge()
@@ -192,52 +192,52 @@ void BcVisual::ResolveElementEdge()
     }
 }
 
-void BcVisual::Calcf2n( int bcType )
+void BcVisual::Calcf2n(int bcType)
 {
-    UnsGrid * grid = Zone::GetUnsGrid();
-    FaceTopo * faceTopo = grid->faceTopo;
-    LinkField & f2n = faceTopo->f2n;
-    BcRecord * bcRecord = faceTopo->bcManager->bcRecord;
+	UnsGrid * grid = Zone::GetUnsGrid();
+	FaceTopo * faceTopo = grid->faceTopo;
+	LinkField & f2n = faceTopo->f2n;
+	BcRecord * bcRecord = faceTopo->bcManager->bcRecord;
 
-    IntField localf2n( 4 );
-    set< HXSort< int > > sets;
-    HXSort< int > data;
+	IntField localf2n(4);
+	set< HXSort< int > > sets;
+	HXSort< int > data;
 
-    this->f2n.resize( 0 );
-    this->l2g.resize( 0 );
+	this->f2n.resize(0);
+	this->l2g.resize(0);
 
-    int nBFace = grid->nBFace;
+	int nBFace = grid->nBFace;
 
-    for ( int iFace = 0; iFace < nBFace; ++ iFace )
-    {
-        if ( bcType != bcRecord->bcType[ iFace ] ) continue;
+	for (int iFace = 0; iFace < nBFace; ++iFace)
+	{
+		if (bcType != bcRecord->bcType[iFace]) continue;
 
-        int nNode = f2n[ iFace ].size();
+		int nNode = f2n[iFace].size();
 
-        localf2n.resize( 0 );
-        for ( int iNode = 0; iNode < nNode; ++ iNode )
-        {
-            int gId = f2n[ iFace ][ iNode ];
+		localf2n.resize(0);
+		for (int iNode = 0; iNode < nNode; ++iNode)
+		{
+			int gId = f2n[iFace][iNode];
 
-            data.value = gId;
-            set< HXSort< int > >::iterator iter = sets.find( data );
+			data.value = gId;
+			set< HXSort< int > >::iterator iter = sets.find(data);
 
-            if ( iter == sets.end() )
-            {
-                this->l2g.push_back( gId );
-                data.index = this->l2g.size() - 1;
+			if (iter == sets.end())
+			{
+				this->l2g.push_back(gId);
+				data.index = this->l2g.size() - 1;
 
-                sets.insert( data );
-                localf2n.push_back( data.index );
-            }
-            else
-            {
-                localf2n.push_back( iter->index );
-            }
+				sets.insert(data);
+				localf2n.push_back(data.index);
+			}
+			else
+			{
+				localf2n.push_back(iter->index);
+			}
 
-        }
-        this->f2n.push_back( localf2n );
-    }
+		}
+		this->f2n.push_back(localf2n);
+	}
 
     //if ( bcType == 3 && false )
     //{
@@ -467,7 +467,7 @@ void UVisualize::Visual()
     VisualTool visualTool;
     visualTool.Init();
 
-    this->CalcNodeField( & visualTool );
+	this->CalcNodeField(&visualTool);
 
     ostringstream oss;
 
@@ -567,7 +567,7 @@ void UVisualize::ShowBc( ostringstream & oss, VisualTool * visualTool )
     UnsGrid * grid = Zone::GetUnsGrid();
 
     IntField bcTypeList;
-    grid->faceTopo->bcManager->CalcBcType( bcTypeList );
+	grid->faceTopo->bcManager->CalcBcType(bcTypeList);
     int nBcType = bcTypeList.size();
 
     for ( int iBcType = 0; iBcType < nBcType; ++ iBcType )
@@ -580,7 +580,7 @@ void UVisualize::ShowBc( ostringstream & oss, VisualTool * visualTool )
 
         BcVisual bcVisual;
 
-        bcVisual.Calc( bcType );
+		bcVisual.Calc(bcType);
 
         bcVisual.Dump( oss, visualTool, bcTitle );
     }    
@@ -592,7 +592,7 @@ void UVisualize::ShowBcDebugTest( ostringstream & oss, VisualTool * visualTool )
     UnsGrid * grid = Zone::GetUnsGrid();
 
     IntField bcTypeList;
-    grid->faceTopo->bcManager->CalcBcType( bcTypeList );
+	grid->faceTopo->bcManager->CalcBcType(bcTypeList);
     int nBcType = bcTypeList.size();
 
     for ( int iBcType = 0; iBcType < nBcType; ++ iBcType )
@@ -606,56 +606,65 @@ void UVisualize::ShowBcDebugTest( ostringstream & oss, VisualTool * visualTool )
 
         BcVisual bcVisual;
 
-        bcVisual.Calc( bcType );
+		bcVisual.Calc(bcType);
 
         bcVisual.DumpDebug( oss, visualTool, bcTitle );
     }
 }
 
-void UVisualize::CalcNodeField( VisualTool * visualTool )
+void UVisualize::CalcNodeField(VisualTool * visualTool)
 {
-    UnsGrid * grid = Zone::GetUnsGrid();
-    MRField * q = ONEFLOW::GetFieldPointer< MRField >( grid, "q" );
+	UnsGrid * grid = Zone::GetUnsGrid();
+	MRField * q = ONEFLOW::GetFieldPointer< MRField >(grid, "q");
 
-    MRField * rn = visualTool->AddField( ( * q )[ IDX::IR ], "r" );
-    MRField * un = visualTool->AddField( ( * q )[ IDX::IU ], "u" );
-    MRField * vn = visualTool->AddField( ( * q )[ IDX::IV ], "v" );
-    MRField * wn = visualTool->AddField( ( * q )[ IDX::IW ], "w" );
-    MRField * pn = visualTool->AddField( ( * q )[ IDX::IP ], "p" );
+	MRField * rn = visualTool->AddField((*q)[IDX::IR], "r");
+	MRField * un = visualTool->AddField((*q)[IDX::IU], "u");
+	MRField * vn = visualTool->AddField((*q)[IDX::IV], "v");
+	MRField * wn = visualTool->AddField((*q)[IDX::IW], "w");
+	MRField * pn = visualTool->AddField((*q)[IDX::IP], "p");
 
-    MRField * gaman = CreateNodeVar( "gama" );
-    MRField * machn = visualTool->CreateField( "mach" );
-    CalcMach( rn, un, vn, wn, pn, gaman, machn );
-    delete gaman;
+	MRField * gaman = CreateNodeVar("gama");
+	MRField * machn = visualTool->CreateField("mach");
+	CalcMach(rn, un, vn, wn, pn, gaman, machn);
+	delete gaman;
 
-    MRField * tempr = ONEFLOW::GetFieldPointer< MRField >( grid, "tempr" );
-    visualTool->AddField( ( * tempr )[ IDX::ITT ], "tempr" );
+	MRField * tempr = ONEFLOW::GetFieldPointer< MRField >(grid, "tempr");
+	visualTool->AddField((*tempr)[IDX::ITT], "tempr");
 
-    if ( vis_model.vismodel > 0 )
-    {
-        visualTool->AddField( "visl" );
-        visualTool->AddField( "vist" );
-    }
+	if (vis_model.vismodel > 0)
+	{
+		visualTool->AddField("visl");
+		visualTool->AddField("vist");
+	}
 }
 
 void CalcMach( MRField * r, MRField * u, MRField * v, MRField * w, MRField * p, MRField * gama, MRField * mach )
 {
     UnsGrid * grid = Zone::GetUnsGrid();
     int nNode = grid->nNode;
-    for ( int iNode = 0; iNode < nNode; ++ iNode )
-    {
-        Real rm = ( * r )[ 0 ][ iNode ];
-        Real um = ( * u )[ 0 ][ iNode ];
-        Real vm = ( * v )[ 0 ][ iNode ];
-        Real wm = ( * w )[ 0 ][ iNode ];
-        Real pm = ( * p )[ 0 ][ iNode ];
+	for (int iNode = 0; iNode < nNode; ++iNode)
+	{
+		Real rm = (*r)[0][iNode];
+		Real um = (*u)[0][iNode];
+		Real vm = (*v)[0][iNode];
+		Real wm = (*w)[0][iNode];
+		Real pm = (*p)[0][iNode];
 
-        Real gm = ( * gama )[ 0 ][ iNode ];
-        Real v2 = SQR( um, vm, wm );
-        Real c2 = gm * pm / rm;
-        Real mm = sqrt( v2 / c2 );
-        ( * mach )[ 0 ][ iNode ] = mm;
-    }
+		Real gm = (*gama)[0][iNode];
+		int startStrategy = ONEFLOW::GetDataValue< int >("startStrategy");
+		if (startStrategy == 2)
+		{
+			(*mach)[0][iNode] = 0;
+		}
+		else
+		{
+			Real v2 = SQR(um, vm, wm);
+			Real c2 = gm * pm / rm;
+			Real mm = sqrt(v2 / c2);
+			(*mach)[0][iNode] = mm;
+		}
+	}
+		
 }
 
 EndNameSpace

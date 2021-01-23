@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------*\
     OneFLOW - LargeScale Multiphysics Scientific Simulation Environment
-    Copyright (C) 2017-2020 He Xin and the OneFLOW contributors.
+    Copyright (C) 2017-2019 He Xin and the OneFLOW contributors.
 -------------------------------------------------------------------------------
 License
     This file is part of OneFLOW.
@@ -79,14 +79,14 @@ void UINsUnstPrepareSrcData( Unsteady * unst )
         data->prim1[ iEqu ] = ( * field->q1 )[ iEqu ][ ug.cId ];
         data->prim2[ iEqu ] = ( * field->q2 )[ iEqu ][ ug.cId ];
     }
-    nscom.gama = ( * uinsf.gama  )[ 0 ][ ug.cId ];
+    inscom.gama = ( * uinsf.gama  )[ 0 ][ ug.cId ];
     gcom.cvol  = ( * ug.cvol  )[ ug.cId ];
     gcom.cvol1 = ( * ug.cvol1 )[ ug.cId ];
     gcom.cvol2 = ( * ug.cvol2 )[ ug.cId ];
 
-	//INsPrimToQ( data->prim , nscom.gama, data->q  );
-	//INsPrimToQ( data->prim1, nscom.gama, data->q1 );
-	//INsPrimToQ( data->prim2, nscom.gama, data->q2 );
+	//INsPrimToQ( data->prim , inscom.gama, data->q  );
+	//INsPrimToQ( data->prim1, inscom.gama, data->q1 );
+	//INsPrimToQ( data->prim2, inscom.gama, data->q2 );
 }
 
 void UINsUnstPrepareCriData( Unsteady * unst )
@@ -100,16 +100,16 @@ void UINsUnstPrepareCriData( Unsteady * unst )
         data->prim2[ iEqu ] = ( * field->q2 )[ iEqu ][ ug.cId ];
     }
 
-    nscom.gama = ( * uinsf.gama  )[ 0 ][ ug.cId ];
+    inscom.gama = ( * uinsf.gama  )[ 0 ][ ug.cId ];
 
     for ( int iEqu = 0; iEqu < data->nEqu; ++ iEqu )
     {
         data->res [ iEqu ] = ( * field->res  )[ iEqu ][ ug.cId ];
     }
 
-	//INsPrimToQ( data->prim , nscom.gama, data->q  );
-	//INsPrimToQ( data->prim1, nscom.gama, data->q1 );
-	//INsPrimToQ( data->prim2, nscom.gama, data->q2 );
+	//INsPrimToQ( data->prim , inscom.gama, data->q  );
+	//INsPrimToQ( data->prim1, inscom.gama, data->q1 );
+	//INsPrimToQ( data->prim2, inscom.gama, data->q2 );
 }
 
 EndNameSpace

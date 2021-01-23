@@ -62,7 +62,6 @@ void GridFactory::Run()
     {
     case 0: //Mesh generation of some basic shapes, such as square cavity, cylinder, RAE2822 airfoil and so on
         this->DataBaseGrid();
-        this->ConvertGrid();
         break;
     case 1:    //Convert grid
         this->ConvertGrid();

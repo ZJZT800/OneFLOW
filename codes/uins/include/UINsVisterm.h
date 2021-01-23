@@ -40,18 +40,21 @@ public:
 public:
     void CalcViscoff();
     void PrepareField();
+    void CalcVisGrad();
 	void CalcPreandVisGrad();
     
 	void CalcVisterm();
-	void CalcFaceVisterm();
-	void CalcBcFaceVisterm();
+	void CalcFaceVisterm(RealField& dudx, RealField& dudy, RealField& dudz, RealField& dvdx, RealField& dvdy, RealField& dvdz, RealField& dwdx, RealField& dwdy, RealField& dwdz);
+	void CalcBcFaceVisterm(RealField& dudx, RealField& dudy, RealField& dudz, RealField& dvdx, RealField& dvdy, RealField& dvdz, RealField& dwdx, RealField& dwdy, RealField& dwdz);
 
     void Alloc();
     void DeAlloc();
 	void CalcINsSrc();
+    void DifEquaMom();
+    void RelaxMom(Real a);
 	//void Addcoff();
 
-	void CalcUnsteadcoff();
+	void CalcTranst();
 public:
     void PrepareFaceValue();
     void SaveFacePara();

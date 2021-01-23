@@ -36,7 +36,6 @@ public:
 };
 
 void NsCalcBc();
-void NsCalcBcDebug( const string & title );
 void NsCalcGamaT(int flag);
 void NsCalcRHS();
 void NsCalcInvFlux();

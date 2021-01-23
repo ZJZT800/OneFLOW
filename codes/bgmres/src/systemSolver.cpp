@@ -8,6 +8,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include "systemSolver.h"
+#include "DataBase.h"
 #include "UCom.h"
 #include <UINsInvterm.h>
 
@@ -51,8 +52,10 @@ void SolveMRhs::BGMRES()
 	Preconditioner* pre =
 		new Preconditioner(Rank.RANKNUMBER);      // The preconditioner for the system.
 	int restart = 0;                    // Number of restarts to allow
-	int maxIt = 500;                      // Dimension of the Krylov subspace
-	double tol = 1.0E-8;                 // How close to make the approximation.
+	int maxIt = ONEFLOW::GetDataValue< int >("GMRESIterStep");
+	double tol = ONEFLOW::GetDataValue< double >("GMRESTol");
+	//int maxIt = 2000;                      // Dimension of the Krylov subspace
+	//double tol = 1.0;                 // How close to make the approximation.
 
 	/**
 	   produce the right-hand sides
@@ -81,7 +84,7 @@ void SolveMRhs::BGMRES()
 
 	//std::cout << "Iterations: " << result << " residual: " << tol << std::endl;
 	finish = clock();
-	time = (double)(finish - start);    //Calculate run time
+	time = (double)(finish - start);    //计算运行时间
 
 	delete A;
 	delete x;

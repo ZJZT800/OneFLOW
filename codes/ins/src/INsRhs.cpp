@@ -60,7 +60,7 @@ INsRhs::~INsRhs()
 
 void INsRhs::UpdateResiduals()
 {
-	INsCalcRHS();
+	//INsCalcRHS();
 }
 
 void INsCalcBc()
@@ -79,7 +79,7 @@ void INsCalcGamaT(int flag)
 	uinsf.Init();
 	ug.SetStEd(flag);
 
-	if (nscom.chemModel == 1)
+	if (inscom.chemModel == 1)
 	{
 	}
 	else
@@ -95,26 +95,33 @@ void INsCalcGamaT(int flag)
 			Real & density = ( * uinsf.q )[ IIDX::IIR ][ cId ];
 			Real & pressure = ( * uinsf.q )[ IIDX::IIP ][ cId ];
 
-			( * uinsf.gama )[ 0 ][ cId ] = nscom.gama_ref;
+			//( * uinsf.gama )[ 0 ][ cId ] = inscom.gama_ref;
 			//( * uinsf.tempr )[ IIDX::IITT ][ cId ] = pressure / ( nscom.statecoef * density * oamw );
-			(*uinsf.tempr)[IIDX::IITT][cId] = 0;
+			//(*uinsf.tempr)[IIDX::IITT][cId] = 0;
 		}
 	}
 }
 
-void INsCalcRHS()
+void INsRhs::FieldInit()
 {
-	INsCalcTimeStep();
-
 	INsPreflux();
+}
+
+void INsRhs::UINsSolver()
+{
 
 	INsCalcInv(); //Calculating the convective term
 
 	INsCalcVis(); //Calculate diffusion term
 
-	INsCalcUnstead(); //Calculating the unsteady term
+	int transt = ONEFLOW::GetDataValue< int >("transt");
+	if (transt != 0) INsTranst(); //Calculating the unsteady term
 
 	INsCalcSrc(); //Calculate the source term and momentum equation coefficients
+
+	DifEqua();
+
+	Relaxation();
 
 	INsMomPre(); //Solving momentum equation
 
@@ -129,13 +136,6 @@ void INsCalcRHS()
 	INsUpdateFaceflux();   //Update interface Flux
 
 	INsUpdateRes();
-}
-
-void INsCalcTimeStep()
-{
-	UINsInvterm * uINsInvterm = new UINsInvterm();
-	uINsInvterm->CalcINsTimeStep();
-	delete uINsInvterm;
 }
 
 void INsPreflux()
@@ -159,10 +159,10 @@ void INsCalcVis()
 	delete uINsVisterm;
 }
 
-void INsCalcUnstead()
+void INsTranst()
 {
 	UINsVisterm * uINsVisterm = new UINsVisterm();
-	uINsVisterm->CalcUnsteadcoff();
+	uINsVisterm->CalcTranst();
 	delete uINsVisterm;
 }
 
@@ -170,6 +170,20 @@ void INsCalcSrc()
 {
 	UINsVisterm * uINsVisterm = new UINsVisterm();
 	uINsVisterm->CalcINsSrc();
+	delete uINsVisterm;
+}
+
+void DifEqua()
+{
+	UINsVisterm* uINsVisterm = new UINsVisterm();
+	uINsVisterm->DifEquaMom();
+	delete uINsVisterm;
+}
+
+void Relaxation()
+{
+	UINsVisterm* uINsVisterm = new UINsVisterm();
+	uINsVisterm->RelaxMom(0.8);
 	delete uINsVisterm;
 }
 

@@ -92,8 +92,8 @@ void VisGradGeom::PrepareCellGeom()
     //( r1x, r1y ) - ( rLx, rLy ) = ( dr1x, dr1y ) - ( drLx, drLy )
     //( dr1x, dr1y ) - ( drLx, drLy ) = d1 * ( fnx, fny ) - ( dxl, dyl )
 
-    this->CalcAngle( this->dxl, this->dyl, this->dzl, - this->d1, this->angle1 );
-    this->CalcAngle( this->dxr, this->dyr, this->dzr,   this->d2, this->angle2 );
+	this->CalcAngle(this->dxl, this->dyl, this->dzl, -this->d1, this->angle1);
+	this->CalcAngle(this->dxr, this->dyr, this->dzr, this->d2, this->angle2);
 }
 
 void VisGradGeom::CalcGradCoef()
@@ -204,7 +204,7 @@ bool VisGrad::TestSatisfied()
     bool result = vgg.angle1 > 0.0 && vgg.angle2 > 0.0 && ABS( vgg.d1 ) > SMALL && ABS( vgg.d2 ) > SMALL;
     if ( result )
     {
-        this->CalcC1C2();
+		this->CalcC1C2();
     }
     return result;
 }

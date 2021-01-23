@@ -29,10 +29,10 @@ BeginNameSpace( ONEFLOW )
 class Rhs
 {
 public:
-    Rhs ();
-    ~Rhs();
+	Rhs();
+	~Rhs();
 public:
-    virtual void UpdateResiduals();
+	virtual void UpdateResiduals();
 };
 
 EndNameSpace

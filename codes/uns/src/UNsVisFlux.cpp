@@ -39,7 +39,6 @@ License
 #include "BcRecord.h"
 #include "ULimiter.h"
 #include "FieldImp.h"
-#include "Iteration.h"
 #include <iostream>
 using namespace std;
 
@@ -248,16 +247,6 @@ void UNsVisFlux::AddVisFlux()
     MRField * res = GetFieldPointer< MRField >( grid, "res" );
 
     ONEFLOW::AddF2CField( res, visflux );
-    if ( Iteration::outerSteps == -31 )
-    {
-        Real mindiff = 1.0e-10;
-        int idumpface = 1;
-        int idumpcell = 0;
-        HXDebug::DumpField( "VisFaceFlux.debug", visflux );
-        HXDebug::CompareFile( mindiff, idumpface );
-        HXDebug::DumpResField( "VisResFlux.debug" );
-        HXDebug::CompareFile( mindiff, idumpcell );
-    }
 }
 
 void UNsVisFlux::PrepareFaceValue()

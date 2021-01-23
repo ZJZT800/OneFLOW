@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------*\
     OneFLOW - LargeScale Multiphysics Scientific Simulation Environment
-    Copyright (C) 2017-2020 He Xin and the OneFLOW contributors.
+    Copyright (C) 2017-2019 He Xin and the OneFLOW contributors.
 -------------------------------------------------------------------------------
 License
     This file is part of OneFLOW.
@@ -23,6 +23,7 @@ License
 #include "NodeField.h"
 #include "UnsGrid.h"
 #include "Zone.h"
+#include "UCom.h"
 #include "DataBase.h"
 #include "FaceTopo.h"
 #include "BcRecord.h"
@@ -45,20 +46,137 @@ MRField * CreateNodeVar( const string & name )
     int nNode = grid->nNode;
     int nEqu = cf->GetNEqu();
 
-    MRField * nf = AllocNodeVar( nEqu );
-    for ( int iEqu = 0; iEqu < nEqu; ++ iEqu )
-    {
-        CalcNodeVar( ( * nf )[ iEqu ], ( * cf )[ iEqu ] );
-    }
-    return nf;
+		MRField * nf = AllocNodeVar(nEqu);
+		for (int iEqu = 0; iEqu < nEqu; ++iEqu)
+		{
+			CalcNodeVar((*nf)[iEqu], (*cf)[iEqu]);
+		}
+		return nf;
 }
 
 MRField * CreateNodeVar( RealField & qc )
 {
     UnsGrid * grid = Zone::GetUnsGrid();
     MRField * fn = AllocNodeVar( 1 );
-    CalcNodeVar( ( * fn )[ 0 ], qc );
-    return fn;
+
+	int startStrategy = ONEFLOW::GetDataValue< int >("startStrategy");
+	if (startStrategy == 2 || startStrategy == 3)
+	{
+		CalcInsNodeVar((*fn)[0], qc);
+	}
+	else
+	{
+		CalcNodeVar((*fn)[0], qc);
+	}
+	return fn;
+}
+
+void CalcInsNodeVar(RealField & qNodeField, RealField & qField)
+{
+
+	UnsGrid * grid = Zone::GetUnsGrid();
+	FaceTopo * faceTopo = grid->faceTopo;
+	LinkField & f2c = faceTopo->f2n;
+
+	int nNode = grid->nNode;
+	int nFace = grid->nFace;
+	int nBFace = grid->nBFace;
+	RealField nCount(nNode);
+	nCount = 0.0;
+	qNodeField = 0.0;
+
+	for (int iFace = nBFace; iFace < nFace; ++iFace)
+	{
+		int lc = faceTopo->lCell[iFace];
+		int rc = faceTopo->rCell[iFace];
+
+		int fnNode = f2c[iFace].size();
+		for (int iNode = 0; iNode < fnNode; ++iNode)
+		{
+			int nodeId = f2c[iFace][iNode];
+
+			qNodeField[nodeId] += qField[lc];
+			nCount[nodeId] += 1;
+
+			qNodeField[nodeId] += qField[rc];
+			nCount[nodeId] += 1;
+		}
+	}
+
+	for (int iFace = 0; iFace < nBFace; ++iFace)
+	{
+		int fnNode = f2c[iFace].size();
+
+		for (int iNode = 0; iNode < fnNode; ++iNode)
+		{
+			int nodeId = f2c[iFace][iNode];
+
+			qNodeField[nodeId] = 0;
+			nCount[nodeId] = 0;
+		}
+	}
+
+
+	for (int iFace = 0; iFace < nBFace; ++iFace)
+	{
+		int fnNode = f2c[iFace].size();
+
+		for (int iNode = 0; iNode < fnNode; ++iNode)
+		{
+			int lc = faceTopo->lCell[iFace];
+			int rc = faceTopo->rCell[iFace];
+
+			int nodeId = f2c[iFace][iNode];
+
+			qNodeField[nodeId] += qField[rc];
+			nCount[nodeId] += 1;
+		}
+
+	}
+
+	for (int iNode = 0; iNode < nNode; ++iNode)
+	{
+		qNodeField[iNode] /= (nCount[iNode] + SMALL);
+	}
+
+
+	/*UnsGrid * grid = Zone::GetUnsGrid();
+	FaceTopo * faceTopo = grid->faceTopo;
+	LinkField & f2c = faceTopo->f2n;
+
+	int nNode = grid->nNode;
+	int nFace = grid->nFace;
+	RealField nCount(nNode);
+	nCount = 0.0;
+	qNodeField = 0.0;
+
+	for (int iFace = 0; iFace < nFace; ++iFace)
+	{
+		int lc = faceTopo->lCell[iFace];
+		int rc = faceTopo->rCell[iFace];
+
+		int fnNode = f2c[iFace].size();
+		for (int iNode = 0; iNode < fnNode; ++iNode)
+		{
+			int nodeId = f2c[iFace][iNode];
+
+			qNodeField[nodeId] += qField[lc];
+			nCount[nodeId] += 1;
+
+			qNodeField[nodeId] += qField[rc];
+			nCount[nodeId] += 1;
+		}
+	}
+
+	FixBcNodeVar(qNodeField, qField, nCount, BC::SYMMETRY, true);
+	FixBcNodeVar(qNodeField, qField, nCount, BC::SOLID_SURFACE, true);
+	FixBcNodeVar(qNodeField, qField, nCount, BC::INTERFACE, true);
+	FixBcNodeVar(qNodeField, qField, nCount, BC::FARFIELD, true);
+
+	for (int iNode = 0; iNode < nNode; ++iNode)
+	{
+		qNodeField[iNode] /= (nCount[iNode] + SMALL);
+	}*/
 }
 
 void CalcNodeVar( RealField & qNodeField, RealField & qField )

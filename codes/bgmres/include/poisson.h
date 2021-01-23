@@ -1,7 +1,5 @@
-#pragma once
-
 #include "systemSolver.h"
-
+#pragma once
 class Solution;
 
 class Poisson

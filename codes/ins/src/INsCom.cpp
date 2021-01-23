@@ -26,27 +26,128 @@ License
 #include "HXMath.h"
 #include "Ctrl.h"
 #include "Chemical.h"
+#include "UCom.h"
 
 BeginNameSpace( ONEFLOW )
 
+INsCom inscom;
 
 INsCom::INsCom()
 {
+    init_flag = false;
 }
 
 INsCom::~INsCom()
 {
+    ;
 }
 
-void INsExtract(RealField & prim, Real & rm, Real & um, Real & vm, Real & wm, Real & pm)
+void INsCom::Init()
 {
-	rm = prim[IIDX::IIR];
-	um = prim[IIDX::IIU];
-	vm = prim[IIDX::IIV];
-	wm = prim[IIDX::IIW];
-	pm = prim[IIDX::IIP];
+    if ( init_flag ) return;
+    init_flag = true;
+    icmpInv = 1;
+    ischeme = GetDataValue< int >( "ischeme" );
+    ivischeme = GetDataValue< int >( "ivischeme" );
+    timestepModel = GetDataValue< int >( "timestepModel" );
+    visSRModel = GetDataValue< int >( "visSRModel" );
+    visTimestepModel = GetDataValue< int >( "visTimestepModel" );
+    chemModel = GetDataValue< int >( "chemModel" );
+    nTModel = GetDataValue< int >( "nTModel" );
+
+    faceOuterNormal = 1;
+    reynolds = GetDataValue< Real >( "reynolds" );
+
+    prl = GetDataValue< Real >( "prl" );
+    prt = GetDataValue< Real >( "prt" );
+
+    aoa = GetDataValue< Real >( "aoa_degree" ) * PI / 180.0;
+    aos = GetDataValue< Real >( "sideslip_degree" ) * PI / 180.0;
+
+    mach_ref = GetDataValue< Real >( "mach_ref" );
+    gama_ref = GetDataValue< Real >( "gama_ref" );
+
+    twall_dim = GetDataValue< Real >( "twall_dim" );
+    tref_dim = GetDataValue< Real >( "tref_dim" );
+    pref_dim = GetDataValue< Real >( "pref_dim" );
+    dref_dim = GetDataValue< Real >( "dref_dim" );
+    vref_dim = GetDataValue< Real >( "vref_dim" );
+
+    elevation = GetDataValue< Real >( "elevation" );
+    reylref_dim = GetDataValue< Real >( "reylref_dim" );
+
+    gasInfoStrategy = GetDataValue< int >( "gasInfoStrategy" );
+    gasModelFile = GetDataValue< string >( "gasModelFile" );
+    machStrategy = GetDataValue< int >( "machStrategy" );
+
+    schmidtl = GetDataValue< Real >( "schmidtl" );
+    schmidtt = GetDataValue< Real >( "schmidtt" );
+
+    max_time_ratio = GetDataValue< Real >( "max_time_ratio" );
+
+    nEqu = GetDataValue< int >( "nEqu" );
+    nTEqu = GetDataValue< int >( "nTEqu" );
+    chem.INsInit();
+
+    oprl = 1.0 / prl;
+    oprt = 1.0 / prt;
+
+    twall = twall_dim / tref_dim;
+
+    const_cp = 1.0 / ( ( gama_ref - 1.0 ) * SQR( mach_ref ) );
+
+    q1.resize( nTEqu );
+    q2.resize( nTEqu );
+
+    q.resize( nTEqu );
+    q0.resize( nTEqu );
+    dq.resize( nTEqu );
+
+    prim.resize( nTEqu );
+    prim0.resize( nTEqu );
+
+    prims1.resize( nTEqu );
+    prims2.resize( nTEqu );
+
+    primt1.resize( nTEqu );
+    primt2.resize( nTEqu );
+
+    t.resize( nTModel );
+    t0.resize( nTModel );
+
+    ts1.resize( nTModel );
+    ts2.resize( nTModel );
+
+    tt1.resize( nTModel );
+    tt2.resize( nTModel );
 }
 
+void INsExtract(RealField& prim, Real& rm, Real& um, Real& vm, Real& wm, Real& pm)
+{
+    rm = prim[IIDX::IIR];
+    um = prim[IIDX::IIR];
+    vm = prim[IIDX::IIR];
+    wm = prim[IIDX::IIR];
+    pm = prim[IIDX::IIR];
+}
+
+void INsExtractl(MRField & q, Real & rm, Real & um, Real & vm, Real & wm, Real & pm)
+{
+	rm = q[IIDX::IIR][ug.lc];
+	um = q[IIDX::IIU][ug.lc];
+	vm = q[IIDX::IIV][ug.lc];
+	wm = q[IIDX::IIW][ug.lc];
+	pm = q[IIDX::IIP][ug.lc];
+}
+
+void INsExtractr(MRField& q, Real& rm, Real& um, Real& vm, Real& wm, Real& pm)
+{
+    rm = q[IIDX::IIR][ug.rc];
+    um = q[IIDX::IIU][ug.rc];
+    vm = q[IIDX::IIV][ug.rc];
+    wm = q[IIDX::IIW][ug.rc];
+    pm = q[IIDX::IIP][ug.rc];
+}
 
 bool INsCheckFunction( RealField & q )
 {

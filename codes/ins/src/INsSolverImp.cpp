@@ -43,25 +43,25 @@ void RegisterINsFunc()
 {
     REGISTER_DATA_CLASS( INsInitFinal );
     REGISTER_DATA_CLASS( INsVisual );
-    REGISTER_DATA_CLASS( INsCalcTimeStep );
+	REGISTER_DATA_CLASS(INsCalcTimeStep);
     REGISTER_DATA_CLASS( INsUpdateResiduals );
     REGISTER_DATA_CLASS( INsImplicitMethod );
     REGISTER_DATA_CLASS( INsPostprocess );
     REGISTER_DATA_CLASS( INsFinalPostprocess );
     REGISTER_DATA_CLASS( INsInitSolver );
-    REGISTER_DATA_CLASS( INsCalcBoundary );
+	REGISTER_DATA_CLASS(INsCalcBoundary);
     REGISTER_DATA_CLASS( IDumpHeatFluxCoeff );
 
-	REGISTER_DATA_CLASS( INsCalcTurb );
-	REGISTER_DATA_CLASS( INsCalcHeat );
+	REGISTER_DATA_CLASS(INsCalcTurb);
+	REGISTER_DATA_CLASS(INsCalcHeat);
 }
 
 void INsInitFinal( StringField & data )
 {
-    INsCalcGamaT( F_INNER );
+	INsCalcGamaT(F_INNER);
     //ICalcLaminarViscosity( F_INNER );
-    INsCalcBc();
-    INsCalcGamaT( F_GHOST );
+	INsCalcBc();
+	INsCalcGamaT(F_GHOST);
     //ICalcLaminarViscosity( F_GHOST );
 
     Grid * grid = Zone::GetGrid();
@@ -83,27 +83,27 @@ void INsVisual( StringField & data )
     ;
 }
 
-void INsCalcBoundary( StringField & data )
+void INsCalcBoundary(StringField & data)
 {
-    INsCalcGamaT( F_INNER );
-   // ICalcLaminarViscosity( F_INNER );
-    INsCalcBc();
-    INsCalcGamaT( F_GHOST );
-   // ICalcLaminarViscosity( F_GHOST );
+	INsCalcGamaT(F_INNER);
+	// ICalcLaminarViscosity( F_INNER );
+	INsCalcBc();
+	INsCalcGamaT(F_GHOST);
+	// ICalcLaminarViscosity( F_GHOST );
 }
 
-void INsCalcTimeStep( StringField & data )
+void INsCalcTimeStep(StringField & data)
 {
-    UTimeStep * uTimeStep = new UTimeStep();
-    uTimeStep->CalcTimeStep();
-    delete uTimeStep;
+	UTimeStep * uTimeStep = new UTimeStep();
+	uTimeStep->CalcTimeStep();
+	delete uTimeStep;
 }
 
-void INsUpdateResiduals( StringField & data )
+void INsUpdateResiduals(StringField & data)
 {
-    Rhs * rhs = new INsRhs();
-    rhs->UpdateResiduals();
-    delete rhs;
+	Rhs * rhs = new INsRhs();
+	rhs->UpdateResiduals();
+	delete rhs;
 }
 
 void INsImplicitMethod( StringField & data )
@@ -226,7 +226,6 @@ SolverRegData * GetINsReg()
     insReg.dataFlag = WITH_DATA;
     return & insReg;
 }
-
-REGISTER_REG_DATA( GetINsReg );
+  REGISTER_REG_DATA( GetINsReg );
 
 EndNameSpace

@@ -54,11 +54,11 @@ void UINsRestart::InitinsRestart( int sTid )
 
     MRField * q  = GetFieldPointer< MRField > ( grid, "q" );
 
-    int nEqu = nscom.inflow.size();
+    int nEqu = inscom.inflow.size();
 
     for ( int iEqu = 0; iEqu < nEqu; ++ iEqu )
     {
-        SetField( ( * q )[ iEqu ], nscom.inflow[ iEqu ] );
+        SetField( ( * q )[ iEqu ], inscom.inflow[ iEqu ] );
     }
     this->InitUnsteady( sTid );
 

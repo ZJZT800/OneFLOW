@@ -35,7 +35,6 @@ public:
     void PrepareData();
     void DumpProbeInfo();
     void SolutionFix();
-    void UpdateFlowFieldValue();
 };
 
 EndNameSpace

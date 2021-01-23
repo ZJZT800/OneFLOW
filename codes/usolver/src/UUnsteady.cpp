@@ -56,8 +56,8 @@ void UUnsteady::UpdateDualTimeStepSource()
 
 void UUnsteady::StoreOldResidual()
 {
-    //Cxh20140818: first of all, we need to know the residualn1 and residualn2 (the residuals at time n and time n-1);
-    //The first step residuals of iteration in two time steps are stored as n-time residuals
+	//Cxh20140818: first of all, we need to know the residualn1 and residualn2 (the residuals at time n and time n-1);
+	 //The first step residuals of iteration in two time steps are stored as n-time residuals
     if ( Iteration::innerSteps != 1 ) return;
 
     for ( int cId = 0; cId < ug.nCell; ++ cId )
@@ -82,55 +82,55 @@ void UUnsteady::PrepareResidual()
 
 void UUnsteady::CalcDualTimeResidual()
 {
-    data->CalcResCoef();
+	data->CalcResCoef();
 
-    for ( int cId = 0; cId < ug.nCell; ++ cId )
-    {
-        ug.cId = cId;
+	for (int cId = 0; cId < ug.nCell; ++cId)
+	{
+		ug.cId = cId;
 
-        this->PrepareResidual();
+		this->PrepareResidual();
 
-        data->CalcCellDualTimeResidual();
+		data->CalcCellDualTimeResidual();
 
-        this->UpdateDualTimeStepResidual();
-    }
+		this->UpdateDualTimeStepResidual();
+	}
 }
 
 void UUnsteady::CalcDualTimeSrc()
 {
-    ug.Init();
-    this->StoreOldResidual();
+	ug.Init();
+	this->StoreOldResidual();
 
-    this->CalcDualTimeResidual();
+	this->CalcDualTimeResidual();
 
-    data->CalcSrcCoeff();
+	data->CalcSrcCoeff();
 
-    for ( int cId = 0; cId < ug.nCell; ++ cId )
-    {
-        ug.cId = cId;
+	for (int cId = 0; cId < ug.nCell; ++cId)
+	{
+		ug.cId = cId;
 
-        ( * this->srcFun )( this );
+		(*this->srcFun)(this);
 
-        data->CalcCellDualTimeSrc();
+		data->CalcCellDualTimeSrc();
 
-        this->UpdateDualTimeStepSource();
-    }
+		this->UpdateDualTimeStepSource();
+	}
 }
 
 void UUnsteady::CalcUnsteadyCriterion()
 {
-    data->ZeroData();
+	data->ZeroData();
 
-    for ( int cId = 0; cId < ug.nCell; ++ cId )
-    {
-        ug.cId = cId;
+	for (int cId = 0; cId < ug.nCell; ++cId)
+	{
+		ug.cId = cId;
 
-        ( * this->criFun )( this );
-        
-        data->CalcCellUnsteadyCri();
-    }
+		(*this->criFun)(this);
 
-    data->CalcCvg();
+		data->CalcCellUnsteadyCri();
+	}
+
+	data->CalcCvg();
 }
 
 EndNameSpace

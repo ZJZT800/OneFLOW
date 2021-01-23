@@ -25,6 +25,7 @@ License
 #include "Mesh.h"
 #include "Ctrl.h"
 #include "Solver.h"
+#include "INsRhs.h"
 #include "Iteration.h"
 #include "DataBase.h"
 #include "UNsSolver.h"
@@ -36,7 +37,9 @@ License
 #include "CmxTask.h"
 #include "BgField.h"
 #include "TimeSpan.h"
+#include "UINsSolver.h"
 #include <iostream>
+#include <Rhs.h>
 using namespace std;
 
 
@@ -119,35 +122,56 @@ void MG::Run()
 		double rhs_v = 1e-8;
 		double rhs_w = 1e-8;
 
-		int maxIterSteps = GetDataValue< int >("maxIterSteps");
-
-		iinv.remax_V = 1;
-
 		iinv.remax_up = 1;
 		iinv.remax_vp = 1;
 		iinv.remax_wp = 1;
 
-			//while (iinv.remax_V > rhs_V )
-		TimeSpan * timeSpan = new TimeSpan();
-		while (SimuIterState::Running())
+		int transt = ONEFLOW::GetDataValue< int >("transt");
+		if(transt!=0)
 		{
-
-			while (iinv.remax_up > rhs_u || iinv.remax_vp > rhs_v || iinv.remax_wp > rhs_w)
+			TimeSpan * timeSpan = new TimeSpan();
+			while (SimuIterState::Running())
 			{
-
-				if (Iteration::innerSteps >= maxIterSteps) break;
-
+				Iteration::outerSteps++;
 				ctrl.currTime += ctrl.pdt;
 
-				Iteration::outerSteps++;
+				INsRhs* uINsSolver = new INsRhs;
+				uINsSolver->FieldInit();
+				delete uINsSolver;
+				int maxIterSteps = GetDataValue< int >("maxIterSteps");
+				while (iinv.remax_up > rhs_u || iinv.remax_vp > rhs_v || iinv.remax_wp > rhs_w)
+				{
+					if (Iteration::innerSteps >= maxIterSteps) break;
+
+					Iteration::innerSteps++;
+
+					this->SolveInnerIter();
+
+				}
+				this->OuterProcess(timeSpan);
+			}
+			delete timeSpan;
+		}
+		else
+		{
+			TimeSpan * timeSpan = new TimeSpan();
+			INsRhs* uINsSolver = new INsRhs;
+			uINsSolver->FieldInit();
+			delete uINsSolver;
+			int maxIterSteps = GetDataValue< int >("maxIterSteps");
+			while (iinv.remax_up > rhs_u || iinv.remax_vp > rhs_v || iinv.remax_wp > rhs_w)
+			{
+				if (Iteration::innerSteps >= maxIterSteps) break;
+
 				Iteration::innerSteps++;
 
 				this->SolveInnerIter();
 
 			}
 			this->OuterProcess(timeSpan);
+			delete timeSpan;
 		}
-		delete timeSpan;
+
 	}
 
 	else
@@ -200,7 +224,7 @@ void MG::PreprocessMultigridFlowField( int gl )
 void MG::InitializeCoarseGridFlowFieldByRestrictFineGridFlowField( int fgl )
 {
     //+ Restrict from fine to coarse grid for all q
-    //+ Corresponding nsmb: wsav = restr (W)
+    //+ Corresponding nsmb: wsav = restr( w )
     //Call the following statement to update the Q value (CQ) on the thin grid
     GridState::SetGridLevel( fgl );
 
@@ -210,8 +234,8 @@ void MG::InitializeCoarseGridFlowFieldByRestrictFineGridFlowField( int fgl )
 void MG::StoreCoarseGridFlowFieldToTemporaryStorage( int fgl )
 {
     int cgl = GridState::GetCGridLevel( fgl );
-    //+ After loadq (coat grid, cqsav), cqsav is actually wsav (corresponding to nsmb notation)
-    //Loadq takes the Q value (CQ) from the sparse grid and assigns it to cqsav
+	//+ After loadq (coat grid, cqsav), cqsav is actually wsav (corresponding to nsmb notation)
+	//Loadq takes the Q value (CQ) from the sparse grid and assigns it to cqsav
     GridState::SetGridLevel( cgl );
 
     ONEFLOW::SsSgTask( "LOAD_Q" );
@@ -220,30 +244,30 @@ void MG::StoreCoarseGridFlowFieldToTemporaryStorage( int fgl )
 void MG::PrepareFineGridResiduals( int fgl )
 {
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    //+ Where (* residual) = - (* RHS) corresponds to - F
-    //+ Note that residual is the value on the dense grid, and RHS should be f. check this
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    //This should be Ni, NJ, NK instead of CNI, CNJ, CNK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//+ Where (* residual) = - (* RHS) corresponds to - F
+	//+ Note that residual is the value on the dense grid, and RHS should be f. check this
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	//This should be Ni, NJ, NK instead of CNI, CNJ, CNK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    //Initialize residual to the last driver (F is 0 for the first time, and there will be a value later)
+	//Initialize residual to the last driver (F is 0 for the first time, and there will be a value later)
     //Residual = ( - f ) == ( - rhs );
     GridState::SetGridLevel( fgl );
 
     ONEFLOW::SsSgTask( "LOAD_RESIDUALS" );
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    //+After updateresiduals, generalresidualfield = Rl (W) - F
+	//+After updateresiduals, generalresidualfield = Rl (W) - F
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ONEFLOW::SsSgTask( "UPDATE_RESIDUALS" );
 }
 
 void MG::PrepareCoarseGridResiduals( int fgl )
 {
-    //+Residual incoarsegrid = - restr (RL (W) - F) after restrict defect
+	//+Residual incoarsegrid = - restr (RL (W) - F) after restrict defect
     GridState::SetGridLevel( fgl );
     ONEFLOW::SsSgTask( "RESTRICT_DEFECT" );
 
-    //After updateresiduals, residualincoarsegrid = RL-1 (wsav) - restr (RL (W) - F)
+	//After updateresiduals, residualincoarsegrid = RL-1 (wsav) - restr (RL (W) - F)
     int cgl = GridState::GetCGridLevel( fgl );
     GridState::SetGridLevel( cgl );
     ONEFLOW::SsSgTask( "UPDATE_RESIDUALS" );
@@ -252,8 +276,8 @@ void MG::PrepareCoarseGridResiduals( int fgl )
 void MG::SolveCoarseGridFlowField( int fgl )
 {
     int cgl = GridState::GetCGridLevel( fgl );
-    //After solvecoarsegridflowfield (CGL), the Q value on the thin grid will be updated
-    //In this case, the Q value on the sparse grid is equal to W0 in nsmb
+	//After solvecoarsegridflowfield (CGL), the Q value on the thin grid will be updated
+	//In this case, the Q value on the sparse grid is equal to W0 in nsmb
 
     //cycleType = 1 V cycle
     //cycleType = 2 W cycle
@@ -277,7 +301,7 @@ void MG::CorrectFineGridFlowFieldByInterplateCoarseGridFlowField( int fgl )
 
     ONEFLOW::SsSgTask( "MODIFY_FINEGRID" );
 
-    //The following is actually to restore the Q value on the sparse grid.
+	//The following is actually to restore the Q value on the sparse grid.
     GridState::SetGridLevel( cgl );
 
     ONEFLOW::SsSgTask( "RECOVER_COARSEGRID" );
@@ -299,7 +323,7 @@ void MG::PostRelaxationCycle( int gl )
 
 void MG::PostprocessMultigridFlowField( int gl )
 {
-    // This is only to restore the initial value of the general residual field. As for the usefulness of this, let's say something else.
+	// This is only to restore the initial value of the general residual field. As for the usefulness of this, let's say something else.
     GridState::SetGridLevel( gl );
 
     ONEFLOW::SsSgTask( "RECOVER_RESIDUALS" );
@@ -321,35 +345,34 @@ void MG::FastSolveFlowFieldByMultigridMethod( int gl )
 
 void MG::SolveMultigridFlowField( int gl )
 {
-	int startStrategy = ONEFLOW::GetDataValue< int >("startStrategy");
-	if (startStrategy == 2|| startStrategy == 3)
-	{
-		//this->MWrap(&MG::PreprocessMultigridFlowField, gl);
-		this->MWrap(&MG::PreRelaxationCycle, gl);
-		//this->FastSolveFlowFieldByMultigridMethod(gl);
-		//this->MWrap(&MG::PostRelaxationCycle, gl);
-		//this->MWrap(&MG::PostprocessMultigridFlowField, gl);
-	}
-	else
-	{
 		this->MWrap(&MG::PreprocessMultigridFlowField, gl);
 		this->MWrap(&MG::PreRelaxationCycle, gl);
 		this->FastSolveFlowFieldByMultigridMethod(gl);
 		this->MWrap(&MG::PostRelaxationCycle, gl);
 		this->MWrap(&MG::PostprocessMultigridFlowField, gl);
-	}
 }
 
 void MG::SolveInnerIter()
 {
-    if ( MG::iterMode == 0 )
-    {
-        this->WeakIter();
-    }
-    else
-    {
-        this->StrongIter();
-    }
+	int startStrategy = ONEFLOW::GetDataValue< int >("startStrategy");
+
+	if (startStrategy == 2 || startStrategy == 3)
+	{
+		INsRhs* uINsSolver = new INsRhs;
+		uINsSolver->UINsSolver();
+		delete uINsSolver;
+	}
+	else
+	{
+		if (MG::iterMode == 0)
+		{
+			this->WeakIter();
+		}
+		else
+		{
+			this->StrongIter();
+		}
+	}
 
     this->InnerProcess();
 }
@@ -376,20 +399,12 @@ void MG::WeakIter()
 
 void MG::StrongIter()
 {
-	int startStrategy = ONEFLOW::GetDataValue< int >("startStrategy");
-	if (startStrategy == 2|| startStrategy == 3)
-	{
-		//this->ZeroResidualsForAllSolvers();
-		this->SolveMultigridFlowField(0);
-	}
-	else
-	{
+
 		this->ZeroResidualsForAllSolvers();
 
 		this->SolveMultigridFlowField(0);
-	}
-}
 
+}
 
 bool DoNotNeedMultigridMethod( int gl )
 {

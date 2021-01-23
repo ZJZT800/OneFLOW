@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------*\
     OneFLOW - LargeScale Multiphysics Scientific Simulation Environment
-    Copyright (C) 2017-2020 He Xin and the OneFLOW contributors.
+    Copyright (C) 2017-2019 He Xin and the OneFLOW contributors.
 -------------------------------------------------------------------------------
 License
     This file is part of OneFLOW.
@@ -30,6 +30,7 @@ MRField * AllocNodeVar( int nEqu = 1 );
 MRField * CreateNodeVar( const string & name );
 MRField * CreateNodeVar( RealField & qc );
 void CalcNodeVar( RealField & qNodeField, RealField & qField );
+void CalcInsNodeVar(RealField & qNodeField, RealField & qField);
 void FixBcNodeVar( RealField & qNodeField, RealField & qField, RealField & nCount, int bcType, bool twoSide );
 
 template < typename T >

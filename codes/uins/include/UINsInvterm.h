@@ -44,20 +44,23 @@ public:
     void DeAlloc();
 	void CalcINsTimeStep();
 	void CalcINsPreflux();
-	void INsPreflux();
-	void Initflux();
+	void Init();
     void CalcInvcoff();
+	void InitInv();
     void CalcInvMassFlux();
     void CalcInvFace();
     void CalcLimiter();
+	void SolveEquation(RealField& sp, RealField2D& ai, RealField& b, RealField& x, Real res);
 	void CalcFaceflux();
 	void CalcINsMomRes();
 	void CalcINsPreRes();
 	void CalcCorrectPresscoef();
-	void CalcNewMomCoe();
+	void InitPresscoef();
+	void maxmin(RealField& a, Real& max_a, Real& min_a);
 	void CalcPressCorrectEqu();
 	void UpdateFaceflux();
 	void CalcUpdateINsFaceflux();
+    void CalcDun();
 	void CalcUpdateINsBcFaceflux();
 	void UpdateSpeed();
 	void UpdateINsRes();
@@ -65,14 +68,14 @@ public:
     void PrepareFaceValue();
 	void PrepareProFaceValue();
 	void CalcPreGrad();
-	//void CalcINsinvTerm();
+	//void CmpINsinvTerm();
     //void UpdateFaceInvFlux();
     void ReadTmp();
 public:
     void GetQlQrField();
     void ReconstructFaceValueField();
     void BoundaryQlQrFixField();
-    void Init();
+    //void Init();
     void MomPre();
 public:
     Limiter* limiter;

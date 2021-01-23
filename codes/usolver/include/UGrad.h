@@ -27,8 +27,8 @@ License
 BeginNameSpace( ONEFLOW )
 
 void CalcGrad( RealField & q, RealField & dqdx, RealField & dqdy, RealField & dqdz );
+void CalcINsGrad(RealField & q, RealField & dqdx, RealField & dqdy, RealField & dqdz);
 void CalcGradGGCellWeight( RealField & q, RealField & dqdx, RealField & dqdy, RealField & dqdz );
 void CalcGradDebug( RealField & q, RealField & dqdx, RealField & dqdy, RealField & dqdz );
-void CalcGradGGCellWeightDebug( RealField & q, RealField & dqdx, RealField & dqdy, RealField & dqdz );
 
 EndNameSpace

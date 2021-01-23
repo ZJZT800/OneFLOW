@@ -71,14 +71,15 @@ public:
     void AccurateFaceValue();
     void AccurateOtherFaceValue();
     void CorrectFaceGrad();
-    void CalcNormalGrad();
-    void CalcTestMethod();
-    void CalcNew1Method();
-    void CalcNew2Method();
+	void CalcNormalGrad();
+	void CalcTestMethod();
+	void CalcNew1Method();
+	void CalcNew2Method();
     void ModifyFaceGrad();
 };
 
 extern VisGrad visQ;
 extern VisGrad visT;
+
 
 EndNameSpace

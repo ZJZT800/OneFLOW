@@ -31,35 +31,6 @@ using namespace std;
 
 BeginNameSpace( ONEFLOW )
 
-//ILusgsData nslu;
-//
-//ILusgsData::ILusgsData()
-//{
-//    ;
-//}
-//
-//ILusgsData::~ILusgsData()
-//{
-//    ;
-//}
-//
-//void ILusgsData::Init()
-//{
-//    nEqu = nscom.nEqu;
-//    nBEqu = nEqu;
-//
-//    radius.resize( nEqu );
-//    dqj.resize( nEqu );
-//    dqi.resize( nEqu );
-//    dqi0.resize( nEqu );
-//    primj.resize( nEqu );
-//    primF.resize( nEqu );
-//    rhs0.resize( nEqu );
-//    dfj.resize( nEqu );
-//    drhs.resize( nEqu );
-//    rhs.resize( nEqu );
-//    tmp.resize( nEqu );
-//}
 
 INsLusgs::INsLusgs()
 {
@@ -119,9 +90,9 @@ void INsLusgs::GetFluxIncrement( int signOfMatrix )
     this->GetStandardFluxIncrement( signOfMatrix );
 }
 
-void INsLusgs::CalcFaceEigenValue( RealField & prim )
+void INsLusgs::CalcFaceEigenValue(RealField & prim)
 {
-    //The value entered here should be the value on the action unit interface
+    //The input here should be the value on the unit of action interface
     Real & rm  = prim[ IIDX::IIR ];
     Real & um  = prim[ IIDX::IIU ];
     Real & vm  = prim[ IIDX::IIV ];
@@ -147,7 +118,7 @@ void INsLusgs::CalcFaceEigenValue( RealField & prim )
 
 void INsLusgs::GetStandardFluxIncrement( int signOfMatrix )
 {
-    this->CalcFaceEigenValue( nslu.primF );
+	this->CalcFaceEigenValue(nslu.primF);
 
     Real & rm  = nslu.primj[ IIDX::IIR ];
     Real & um  = nslu.primj[ IIDX::IIU ];
@@ -180,7 +151,7 @@ void INsLusgs::GetStandardFluxIncrement( int signOfMatrix )
 
     Real dh, hm;
 
-    ONEFLOW::CalcIDH( nslu.primj, nslu.gama, nslu.dqj, dh, hm );
+	ONEFLOW::CalcIDH(nslu.primj, nslu.gama, nslu.dqj, dh, hm);
 
     Real term1 =  dh   * x1 + dc * x2;
     Real term2 =  c2dc * x1 + dh * x2;

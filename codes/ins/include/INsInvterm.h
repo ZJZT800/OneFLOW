@@ -55,15 +55,21 @@ public:
 public:
     Real gama;
     Real gama1;
-    Real gama2;
+    Real gama2; 
 public:
     RealField prim, prim1, prim2;
     RealField q, q1, q2;
     RealField dq;
     RealField flux, flux1, flux2;
-	//RealField * rf, *uf, *vf, *wf;
-	RealField bc,aji, spj,Vdv, spp,  app, ajp,idx,spu,spv,spw,spu1, spv1, spw1, spu2, spv2, spw2, sp1, sp2, bm1,bm2, buc, bvc, bwc, aju, ajv, ajw, VdU, VdV, VdW,bpu, bpv, bpw, sppu, sppv, sppw, pp1, uu, vv, ww, ai1, ai2, aii1,aii2, akku1, akku2, akkv1, akkv2, akkw1, akkw2,aku1,aku2,akv1,akv2,akw1,akw2,f1, f2, pp, uuj, vvj, wwj,uc,vc,wc, mp,ppr,ppl, bp, dqqdx, dqqdy, dqqdz,muc,mvc,mwc,sju,sjv,sjw,pp0,pc,fq, up,vp,wp,spt, but, bvt,bwt,bmu1,bmu2,bmv1,bmv2,bmw1,bmw2, Fnu, Fnv, Fnw,  ukl, ukr, vkl, vkr, wkl,wkr, uml, umr, vml, vmr, wml, wmr, Pufd,Pvfd,Pwfd,Fpu,Fpv,Fpw,tux, tvy, twz, Fqu, Fqv, Fqw, FuT, FvT, FwT, PufdT, PvfdT, PwfdT, dsrl, elrn, visu,visv,visw, Fu1, Fv1, Fw1, bppu, bppv, bppw,ump,vmp,wmp, fqr,bi1,bi2,Fn, spc,fq1,fq2, Bpe1,Bpe2,mu,mv,mw,mpp, mua, mva, mwa,mppa, res_V, res_pp, res_up, res_vp, res_wp, rf, uf, vf, wf, Vdvu, Vdvv, Vdvw;
-	RealField2D  spuj, spvj, spwj, sjp, ai, biu, biv,biw, sj,sd,sjd;
+	RealField uf, vf, wf, pf;
+	RealField fq, VdU, Vdvu;
+	RealField spc, buc, bvc, bwc;
+	RealField spp, bp;
+	RealField dun, dup;
+	RealField  ppf, pp;
+	RealField  dppbdx, dppbdy, dppbdz;
+
+    RealField2D ai,ajp;
 	
 
 public:
@@ -72,12 +78,13 @@ public:
 
     Real eig11, eig12, eig13;
     Real eig21, eig22, eig23;
-	Real vnrel, timestep, res_u, res_v, res_w, res_p, maxu, maxv, maxw, c2d, Fn1, Fn2, Fn3, lfdist, rfdist, ppd, vis, remax_V, remax_pp, remax_up, remax_vp, remax_wp, vnflow, l2rdx, l2rdy, l2rdz, Puf, Pvf, Pwf, Pdu, Pdv, Pdw, Ftu1, Ftv1, Ftw1, Ftu2, Ftv2, Ftw2, PufT, PvfT, PwfT, Pud, Pvd, Pwd, FtuT, FtvT, FtwT, Vau, Vav, Vaw, dist, Deun, Devn, Dewn, dlf, dfr, Bpe, fux, value;
-    Real cl, cr, cm;
+
 public:
     Real rl, ul, vl, wl, pl, hl, el;
     Real rr, ur, vr, wr, pr, hr, er;
     Real rm, um, vm, wm, pm, hm, em;
+	Real rf, vnflow, fux;
+	Real remax_up, remax_vp, remax_wp, remax_pp, res_u, res_v, res_w, res_p;
 
 };
 
@@ -87,33 +94,30 @@ class INsInvterm
 {
 public:
 	INsInvterm();
-    ~INsInvterm();
+	~INsInvterm();
 public:
-    //typedef void (INsInvterm:: * InvtermPointer )();
+	//typedef void (INsInvterm:: * InvtermPointer )();
 public:
-    void Solve();
+	void Solve();
 public:
-    //void SetPointer( int schemeIndex );
+	//void SetPointer( int schemeIndex );
 	//InvtermPointer InvtermPointer;
 public:
 	void CalcINsinvFlux();
 	void CalcINsBcinvFlux();
 	void CalcINsinvTerm();
 	void CalcINsBcinvTerm();
-	void CalcINsFaceflux();
-	void CalcINsBcFaceflux();
+	void CalcINsFaceflux(RealField & dpdx, RealField & dpdy, RealField & dpdz);
+	void CalcINsBcFaceflux(RealField& dpdx, RealField& dpdy, RealField& dpdz);
 	void CalcINsFaceCorrectPresscoef();
 	void CalcINsBcFaceCorrectPresscoef();
-	//void CalcINsinvTerm();
-	//void CalcINsFaceflux();
-	//void CalcINsFaceCorrectPresscoef();
-public:
 };
+   
 
-void INsCalcEnthalpy( RealField & prim, Real gama, Real & enthalpy );
-void INsCalcTotalEnthalpyChange( RealField & prim, Real & gama, RealField & dq, Real & dh );
-void INsPrimToQ( RealField & prim, Real gama, RealField & q );
-void INsQToPrim( RealField & q, Real gama, RealField & prim, RealField & temp );
-void INsCalcInternalEnergy( RealField & prim, Real gama, Real & em );
+	void INsCalcEnthalpy(RealField & prim, Real gama, Real & enthalpy);
+	void INsCalcTotalEnthalpyChange(RealField & prim, Real & gama, RealField & dq, Real & dh);
+    void INsPrimToQ( RealField & prim, Real gama, RealField & q );
+    void INsQToPrim( RealField & q, Real gama, RealField & prim, RealField & temp );
+    void INsCalcInternalEnergy(RealField & prim, Real gama, Real & em);
 
 EndNameSpace

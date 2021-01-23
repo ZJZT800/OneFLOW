@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------*\
     OneFLOW - LargeScale Multiphysics Scientific Simulation Environment
-    Copyright (C) 2017-2020 He Xin and the OneFLOW contributors.
+    Copyright (C) 2017-2019 He Xin and the OneFLOW contributors.
 -------------------------------------------------------------------------------
 License
     This file is part of OneFLOW.
@@ -23,15 +23,21 @@ License
 #include "UINsGrad.h"
 #include "UCom.h"
 #include "INsCom.h"
+#include "UINsCom.h"
+#include "INsInvterm.h"
+#include "INsVisterm.h"
+#include "HXMath.h"
 #include "DataBase.h"
 #include "FieldImp.h"
 #include "FaceTopo.h"
 #include "BcRecord.h"
 #include "UnsGrid.h"
 #include "Zone.h"
+#include "INsIdx.h"
 #include "FaceMesh.h"
 #include "CellMesh.h"
 #include "CellTopo.h"
+
 
 BeginNameSpace( ONEFLOW )
 
@@ -53,22 +59,56 @@ void UINsGrad::Init()
 {
     UnsGrid * grid = Zone::GetUnsGrid();
 
-    name  = "q";
+    //name  = "qf";
     namex = "dqdx";
     namey = "dqdy";
     namez = "dqdz";
 
-    q    = GetFieldPointer< MRField > ( grid, name  );
+	//qf   = GetFieldPointer< MRField > ( grid, name  );
     dqdx = GetFieldPointer< MRField > ( grid, namex );
     dqdy = GetFieldPointer< MRField > ( grid, namey );
     dqdz = GetFieldPointer< MRField > ( grid, namez );
-    bdqdx = GetFieldPointer< MRField > ( grid, "bcdqdx" );
-    bdqdy = GetFieldPointer< MRField > ( grid, "bcdqdy" );
-    bdqdz = GetFieldPointer< MRField > ( grid, "bcdqdz" );
 
-    this->nEqu = nscom.nTEqu;
+	for (int fId = 0; fId < ug.nBFace; ++fId)
+	{
+		ug.fId = fId;
 
-    this->istore = 1;
+		(*uinsf.qf)[IIDX::IIU][ug.fId] = iinv.uf[ug.fId];
+		(*uinsf.qf)[IIDX::IIV][ug.fId] = iinv.vf[ug.fId];
+		(*uinsf.qf)[IIDX::IIW][ug.fId] = iinv.wf[ug.fId];
+	}
+	for (int fId = ug.nBFace; fId < ug.nFace; ++fId)
+	{
+		ug.fId = fId;
+		ug.lc = (*ug.lcf)[ug.fId];
+		ug.rc = (*ug.rcf)[ug.fId];
+
+		Real dxl = (*ug.xfc)[ug.fId] - (*ug.xcc)[ug.lc];
+		Real dyl = (*ug.yfc)[ug.fId] - (*ug.ycc)[ug.lc];
+		Real dzl = (*ug.zfc)[ug.fId] - (*ug.zcc)[ug.lc];
+
+		Real dxr = (*ug.xfc)[ug.fId] - (*ug.xcc)[ug.rc];
+		Real dyr = (*ug.yfc)[ug.fId] - (*ug.ycc)[ug.rc];
+		Real dzr = (*ug.zfc)[ug.fId] - (*ug.zcc)[ug.rc];
+
+		Real delt1 = DIST(dxl, dyl, dzl);
+		Real delt2 = DIST(dxr, dyr, dzr);
+		Real delta = 1.0 / (delt1 + delt2);
+
+		Real cl = delt2 * delta;
+		Real cr = delt1 * delta;
+
+		(*uinsf.qf)[IIDX::IIU][ug.fId] = cl * (*uinsf.q)[IIDX::IIU][ug.lc] + cr * (*uinsf.q)[IIDX::IIU][ug.rc];;
+		(*uinsf.qf)[IIDX::IIV][ug.fId] = cl * (*uinsf.q)[IIDX::IIV][ug.lc] + cr * (*uinsf.q)[IIDX::IIV][ug.rc];;
+		(*uinsf.qf)[IIDX::IIW][ug.fId] = cl * (*uinsf.q)[IIDX::IIW][ug.lc] + cr * (*uinsf.q)[IIDX::IIW][ug.rc];;
+	}
+    //bdqdx = GetFieldPointer< MRField > ( grid, "bcdqdx" );
+    //bdqdy = GetFieldPointer< MRField > ( grid, "bcdqdy" );
+    //bdqdz = GetFieldPointer< MRField > ( grid, "bcdqdz" );
+
+    //this->nEqu = inscom.nTEqu;
+
+    //this->istore = 1;
 }
 
 UITGrad::UITGrad()
@@ -95,7 +135,7 @@ void UITGrad::Init()
 	dqdy = GetFieldPointer< MRField >(grid, namey);
 	dqdz = GetFieldPointer< MRField >(grid, namez);
 
-	this->nEqu = nscom.nTModel;
+	this->nEqu = inscom.nTModel;
 
 	this->istore = 0;
 }

@@ -33,20 +33,22 @@ public:
     ~INsRhs();
 public:
     void UpdateResiduals();
+	void FieldInit();
+	void UINsSolver();
 };
 
 void INsCalcBc();
 void INsCalcGamaT(int flag);
-void INsCalcRHS();
 void INsCalcChemSrc();
 void INsCalcTurbEnergy();
 void INsCorrectPresscoef();
-void INsCalcTimeStep();
 void INsPreflux();
 void INsCalcInv();
 void INsCalcVis();
-void INsCalcUnstead();
+void INsTranst();
 void INsCalcSrc();
+void DifEqua();
+void Relaxation();
 void INsMomPre();
 void INsCalcFaceflux();
 void INsCalcPressCorrectEquandUpdatePress();

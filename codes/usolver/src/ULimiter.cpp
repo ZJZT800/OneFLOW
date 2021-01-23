@@ -29,6 +29,7 @@ License
 #include "Boundary.h"
 #include "BcRecord.h"
 #include "Iteration.h"
+#include "DataBase.h"
 
 BeginNameSpace( ONEFLOW )
 
@@ -136,16 +137,16 @@ void LimField::GetQlQr()
         ug.lc = ( * ug.lcf )[ ug.fId ];
         ug.rc = ( * ug.rcf )[ ug.fId ];
 
-        if ( fId == 433 )
-        {
-            vector< Real > tmp1, tmp2;
-            for ( int iEqu = 0; iEqu < this->nEqu; ++ iEqu )
-            {
-                tmp1.push_back( ( * this->q )[ iEqu ][ ug.lc ] );
-                tmp2.push_back( ( * this->q )[ iEqu ][ ug.rc ] );
-            }
-            int kkk = 1;
-        }
+		if (fId == 433)
+		{
+			vector< Real > tmp1, tmp2;
+			for (int iEqu = 0; iEqu < this->nEqu; ++iEqu)
+			{
+				tmp1.push_back((*this->q)[iEqu][ug.lc]);
+				tmp2.push_back((*this->q)[iEqu][ug.rc]);
+			}
+			int kkk = 1;
+		}
 
         for ( int iEqu = 0; iEqu < this->nEqu; ++ iEqu )
         {
@@ -188,7 +189,7 @@ void LimField::CalcFaceValue()
         ug.lc = ( * ug.lcf )[ ug.fId ];
         ug.rc = ( * ug.rcf )[ ug.fId ];
 
-        if ( fId == 433 )
+        if ( fId == 433)
         {
             int kkk = 1;
         }
@@ -219,7 +220,7 @@ void LimField::CalcFaceValue()
         {
             for ( int iEqu = 0; iEqu < this->nEqu; ++ iEqu )
             {
-                ( * this->qf1 )[ iEqu ][ ug.fId ] = qTry[ iEqu ];
+                ( * this->qf1 )[ iEqu ][ ug.fId] = qTry[ iEqu ];
             }
         }
 
@@ -229,7 +230,7 @@ void LimField::CalcFaceValue()
 
         for ( int iEqu = 0; iEqu < this->nEqu; ++ iEqu )
         {
-            qTry[ iEqu ] = ( * this->qf2 )[ iEqu ][ ug.fId ];
+            qTry[ iEqu ] = ( * this->qf2 )[ iEqu ][ ug.fId];
         }
 
         for ( int iEqu = 0; iEqu < this->nEqu; ++ iEqu )
@@ -387,7 +388,7 @@ void Limiter::CalcLimiter()
         lim->dqdy    = & ( * limf->dqdy    )[ iEqu ];
         lim->dqdz    = & ( * limf->dqdz    )[ iEqu ];
         this->SetInitValue();
-        this->CalcLimiterScalar();
+		this->CalcLimiterScalar();
     }
     DeAlloc();
 }
@@ -414,22 +415,22 @@ void Limiter::SetInitValue()
 
 void Limiter::CalcLimiterScalar()
 {
-    if ( limflag == ILMT_ZERO )
-    {
-        this->CalcZeroLimiter();
-    }
-    else if ( limflag == ILMT_NO )
-    {
-        this->CalcNoLimiter();
-    }
-    else if ( limflag == ILMT_BARTH )
-    {
-        this->CalcBarthLimiter();
-    }
-    else if ( limflag == ILMT_VENCAT )
-    {
-        this->CalcVencatLimiter();
-    }
+	if (limflag == ILMT_ZERO)
+	{
+		this->CalcZeroLimiter();
+	}
+	else if (limflag == ILMT_NO)
+	{
+		this->CalcNoLimiter();
+	}
+	else if (limflag == ILMT_BARTH)
+	{
+		this->CalcBarthLimiter();
+	}
+	else if (limflag == ILMT_VENCAT)
+	{
+		this->CalcVencatLimiter();
+	}
 }
 
 void Limiter::CalcZeroLimiter()
@@ -466,40 +467,40 @@ void Limiter::CalcNoLimiter()
 
 void Limiter::CalcBarthLimiter()
 {
-    this->CalcMinMaxDiff();
+	this->CalcMinMaxDiff();
 
-    for ( int fId = 0; fId < ug.nFace; ++ fId )
-    {
-        ug.fId = fId;
-        ug.lc = ( * ug.lcf )[ ug.fId ];
-        ug.rc = ( * ug.rcf )[ ug.fId ];
+	for (int fId = 0; fId < ug.nFace; ++fId)
+	{
+		ug.fId = fId;
+		ug.lc = (*ug.lcf)[ug.fId];
+		ug.rc = (*ug.rcf)[ug.fId];
 
-        this->PrepareData();
+		this->PrepareData();
 
-        this->CalcLocalBarthLimiter();
+		this->CalcLocalBarthLimiter();
 
-        ( * lim->limiter )[ ug.lc ] = lim->lim1;
-        ( * lim->limiter )[ ug.rc ] = lim->lim2;
-    }
+		(*lim->limiter)[ug.lc] = lim->lim1;
+		(*lim->limiter)[ug.rc] = lim->lim2;
+	}
 }
 
 void Limiter::CalcVencatLimiter()
 {
-    this->CalcMinMaxDiff();
+	this->CalcMinMaxDiff();
 
-    for ( int fId = 0; fId < ug.nFace; ++ fId )
-    {
-        ug.fId = fId;
-        ug.lc = ( * ug.lcf )[ ug.fId ];
-        ug.rc = ( * ug.rcf )[ ug.fId ];
+	for (int fId = 0; fId < ug.nFace; ++fId)
+	{
+		ug.fId = fId;
+		ug.lc = (*ug.lcf)[ug.fId];
+		ug.rc = (*ug.rcf)[ug.fId];
 
-        this->PrepareData();
+		this->PrepareData();
 
-        this->CalcLocalVencatLimiter();
+		this->CalcLocalVencatLimiter();
 
-        ( * lim->limiter )[ ug.lc ] = lim->lim1;
-        ( * lim->limiter )[ ug.rc ] = lim->lim2;
-    }
+		(*lim->limiter)[ug.lc] = lim->lim1;
+		(*lim->limiter)[ug.rc] = lim->lim2;
+	}
 }
 
 void Limiter::PrepareData()

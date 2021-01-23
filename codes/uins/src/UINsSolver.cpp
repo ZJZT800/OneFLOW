@@ -33,7 +33,14 @@ License
 #include "INsIdx.h"
 #include "HXMath.h"
 #include "UINsLusgs.h"
+#include "INsInvterm.h"
+#include "UINsVisterm.h"
+#include "UINsInvterm.h"
+#include "UCom.h"
+#include "Zone.h"
+#include "UINsCom.h"
 #include <iostream>
+
 using namespace std;
 
 BeginNameSpace( ONEFLOW )
@@ -48,18 +55,19 @@ UINsSolver::~UINsSolver()
 {
 }
 
+void UINsSolver::Init()
+{
+}
+
 void UINsSolver::StaticInit()
 {
     INsSolver::StaticInit();
     LusgsState::AddSolver( this->sid, this->gridType, new UINsLusgs() );
 }
 
-void UINsSolver::Init()
-{
-}
-
 void UINsSolver::Run()
 {
 }
+
 
 EndNameSpace

@@ -34,6 +34,7 @@ const int F_GHOST = 1;
 const int F_TOTAL = 2;
 
 class UnsGrid;
+
 class UGeom
 {
 public:
@@ -41,11 +42,11 @@ public:
     ~UGeom();
 public:
     void Init();
-    void CreateBcTypeRegion();
+	void CreateBcTypeRegion();
     void SetStEd( int flag );
     void DumpCellFace( int cId );
 public:
-    UnsGrid * grid;
+	UnsGrid * grid;
     int fId;
     int cId;
     int bcfId;
@@ -56,7 +57,7 @@ public:
     int ist, ied;
     int lc;
     int rc;
-    int ir, bcNameId, bctype, nRegion, nRBFace;
+    int ir, bcNameId, bcr, bcdtkey, bctype, nRegion, nRBFace;
     int ireconface;
 public:
     IntField * lcf;
@@ -69,6 +70,12 @@ public:
     RealField * zfn;
     RealField * vfn;
     RealField * farea;
+
+    RealField * a1;
+    RealField * a2;
+    RealField * a3;
+    RealField * fl;
+    RealField * fr;
 
     RealField * xfc;
     RealField * yfc;
@@ -89,21 +96,5 @@ extern UGeom ug;
 
 void AddF2CField( MRField * cellField, MRField * faceField );
 void AddF2CFieldDebug( MRField * cellField, MRField * faceField );
-
-class HXDebug
-{
-public:
-    HXDebug();
-    ~HXDebug();
-    static string fileName1, fileName2;
-public:
-    static void DumpResField( const string & fileName );
-    static void DumpField( const string & fileName, MRField * field );
-    static string GetFullFileName( const string & fileName, int startStrategy );
-    static void CompareFile( Real mindiff, int idump );
-    static MRField * ReadField( const string & fileName );
-    static void DumpCellInfo( int iCell );
-    static void CheckNANField( MRField * field );
-};
 
 EndNameSpace

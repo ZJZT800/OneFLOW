@@ -38,9 +38,9 @@ public:
     ~VisGradGeom();
 public:
     void CalcFaceWeight();
-    void CalcAngle( Real dx, Real dy, Real dz, Real dist, Real & angle );
+	void CalcAngle(Real dx, Real dy, Real dz, Real dist, Real & angle);
     void PrepareCellGeom();
-    void CalcGradCoef();
+	void CalcGradCoef();
 public:
     Real dxl, dyl, dzl;
     Real dxr, dyr, dzr;
@@ -73,15 +73,15 @@ public:
     void ZeroNormalGrad();
     void AverFaceValue ();
     void CorrectFaceGrad();
-    void CalcNormalGrad();
-    void CalcTestMethod();
-    void CalcNew1Method();
-    void CalcNew2Method();
+	void CalcNormalGrad();
+	void CalcTestMethod();
+	void CalcNew1Method();
+	void CalcNew2Method();
     bool FaceAngleIsValid();
     bool TestSatisfied();
     bool New1Satisfied();
     bool New2Satisfied();
-    void CalcC1C2();
+	void CalcC1C2();
     void AccurateSideValue();
     void AccurateFaceValue();
     void ModifyFaceGrad();

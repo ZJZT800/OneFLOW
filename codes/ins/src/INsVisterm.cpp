@@ -32,6 +32,8 @@ BeginNameSpace( ONEFLOW )
 
 INsVis Ivis;
 
+
+
 INsVis::INsVis()
 {
     ;
@@ -44,7 +46,7 @@ INsVis::~INsVis()
 
 void INsVis::Init()
 {
-    fvis.resize( nscom.nEqu );
+    fvis.resize( inscom.nEqu );
 }
 
 INsVisterm::INsVisterm()
@@ -78,8 +80,8 @@ void INsVisterm::AverFaceValue()
 
 void INsVisterm::AverOtherFaceValue()
 {
-    nscom.visl   = half * ( nscom.visl1 + nscom.visl2 );
-    nscom.vist   = half * ( nscom.vist1 + nscom.vist2 );
+    inscom.visl   = half * ( inscom.visl1 + inscom.visl2 );
+    inscom.vist   = half * ( inscom.vist1 + inscom.vist2 );
 }
 
 void INsVisterm::AccurateFaceValue()
@@ -91,8 +93,8 @@ void INsVisterm::AccurateFaceValue()
 
 void INsVisterm::AccurateOtherFaceValue()
 {
-    nscom.visl   = half * ( nscom.visl1 + nscom.visl2 );
-    nscom.vist   = half * ( nscom.vist1 + nscom.vist2 );
+    inscom.visl   = half * ( inscom.visl1 + inscom.visl2 );
+    inscom.vist   = half * ( inscom.vist1 + inscom.vist2 );
 }
 
 void INsVisterm::CorrectFaceGrad()
@@ -103,26 +105,26 @@ void INsVisterm::CorrectFaceGrad()
 
 void INsVisterm::CalcNormalGrad()
 {
-    visQ.CalcNormalGrad();
-    visT.CalcNormalGrad();
+	visQ.CalcNormalGrad();
+	visT.CalcNormalGrad();
 }
 
 void INsVisterm::CalcTestMethod()
 {
-    visQ.CalcTestMethod();
-    visT.CalcTestMethod();
+	visQ.CalcTestMethod();
+	visT.CalcTestMethod();
 }
 
 void INsVisterm::CalcNew1Method()
 {
-    visQ.CalcNew1Method();
-    visT.CalcNew1Method();
+	visQ.CalcNew1Method();
+	visT.CalcNew1Method();
 }
 
 void INsVisterm::CalcNew2Method()
 {
-    visQ.CalcNew2Method();
-    visT.CalcNew2Method();
+	visQ.CalcNew2Method();
+	visT.CalcNew2Method();
 }
 
 void INsVisterm::ModifyFaceGrad()

@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------*\
     OneFLOW - LargeScale Multiphysics Scientific Simulation Environment
-    Copyright (C) 2017-2020 He Xin and the OneFLOW contributors.
+    Copyright (C) 2017-2019 He Xin and the OneFLOW contributors.
 -------------------------------------------------------------------------------
 License
     This file is part of OneFLOW.
@@ -45,7 +45,7 @@ UInt FaceMesh::GetNFace()
 
 UInt FaceMesh::CalcTotalFaceNodes()
 {
-    return faceTopo->CalcTotalFaceNodes();
+	return faceTopo->CalcTotalFaceNodes();
 }
 
 UInt FaceMesh::GetNBFace()
@@ -58,7 +58,7 @@ void FaceMesh::SetNBFace( UInt nBFace )
     faceTopo->SetNBFace( nBFace );
 }
 
-void FaceMesh::CalcFaceCenter1D( NodeMesh * nodeMesh )
+void FaceMesh::CalcFaceCenter1D(NodeMesh * nodeMesh)
 {
     UInt nFace = this->GetNFace();
     RealField & xN = nodeMesh->xN;
@@ -76,7 +76,7 @@ void FaceMesh::CalcFaceCenter1D( NodeMesh * nodeMesh )
     }
 }
 
-void FaceMesh::CalcFaceNormal1D( NodeMesh * nodeMesh, CellMesh * cellMesh )
+void FaceMesh::CalcFaceNormal1D(NodeMesh * nodeMesh, CellMesh * cellMesh)
 {
     UInt nFace = this->GetNFace();
     RealField & xN = nodeMesh->xN;
@@ -103,11 +103,15 @@ void FaceMesh::CalcFaceNormal1D( NodeMesh * nodeMesh, CellMesh * cellMesh )
         zfn[ iFace ] = factor * dz;
 
         area[ iFace ] = 1.0;
+
+        a1[iFace] = xfn[iFace] * area[iFace];
+        a2[iFace] = yfn[iFace] * area[iFace];
+        a3[iFace] = zfn[iFace] * area[iFace];
     }
 }
 
 
-void FaceMesh::CalcFaceNormal2D( NodeMesh * nodeMesh )
+void FaceMesh::CalcFaceNormal2D(NodeMesh * nodeMesh)
 {
     RealField & xN = nodeMesh->xN;
     RealField & yN = nodeMesh->yN;
@@ -126,6 +130,10 @@ void FaceMesh::CalcFaceNormal2D( NodeMesh * nodeMesh )
         zfn[ iFace ]  = 0.0;
 
         area[ iFace ] = ONEFLOW::DIST( xfn[ iFace ], yfn[ iFace ], zfn[ iFace ] );
+
+        a1[iFace] = xfn[iFace];
+        a2[iFace] = yfn[iFace];
+        a3[iFace] = zfn[iFace];
     }
 
     for ( UInt iFace = 0; iFace < nFace; ++ iFace )
@@ -137,7 +145,7 @@ void FaceMesh::CalcFaceNormal2D( NodeMesh * nodeMesh )
     }
 }
 
-void FaceMesh::CalcFaceCenter2D( NodeMesh * nodeMesh )
+void FaceMesh::CalcFaceCenter2D(NodeMesh * nodeMesh)
 {
     UInt nFace = this->GetNFace();
     RealField & xN = nodeMesh->xN;
@@ -157,7 +165,7 @@ void FaceMesh::CalcFaceCenter2D( NodeMesh * nodeMesh )
     int kkk = 1;
 }
 
-void FaceMesh::CalcFaceNormal3D( NodeMesh * nodeMesh )
+void FaceMesh::CalcFaceNormal3D(NodeMesh * nodeMesh)
 {
     xfn = 0;
     yfn = 0;
@@ -194,6 +202,10 @@ void FaceMesh::CalcFaceNormal3D( NodeMesh * nodeMesh )
             zfn[ iFace ] += half * ( dx1 * dy2 - dx2 * dy1 );
         }
         area[ iFace ] = ONEFLOW::DIST( xfn[ iFace ], yfn[ iFace ], zfn[ iFace ] );
+
+        a1[iFace] = xfn[iFace];
+        a2[iFace] = yfn[iFace];
+        a3[iFace] = zfn[iFace];
     }
 
     for ( UInt iFace = 0; iFace < nFace; ++ iFace )
@@ -205,7 +217,7 @@ void FaceMesh::CalcFaceNormal3D( NodeMesh * nodeMesh )
     }
 }
 
-void FaceMesh::CalcFaceCenter3D( NodeMesh * nodeMesh )
+void FaceMesh::CalcFaceCenter3D(NodeMesh * nodeMesh)
 {
     RealField & xN = nodeMesh->xN;
     RealField & yN = nodeMesh->yN;
@@ -293,10 +305,15 @@ void FaceMesh::AllocateMetrics()
     this->yfn.resize( nFace );
     this->zfn.resize( nFace );
     this->area.resize( nFace );
+    this->a1.resize(nFace);
+    this->a2.resize(nFace);
+    this->a3.resize(nFace);
     this->vfx.resize( nFace );
     this->vfy.resize( nFace );
     this->vfz.resize( nFace );
     this->vfn.resize( nFace );
+    this->fl.resize(nFace);
+    this->fr.resize(nFace);
     this->vfx = 0;
     this->vfy = 0;
     this->vfz = 0;

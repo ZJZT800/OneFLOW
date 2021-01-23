@@ -40,8 +40,30 @@ public:
 public:
     void Run();
     void Init();
+//public:
+//    void ConvDiscret();
+//    void DiffuDiscret();
 public:
     void StaticInit();
+//public:
+    //void uINsSolver();
+//public:
+//    RealField* q;
+//    MRField* rho;
+//    MRField* mu;
 };
+
+//void INsPreflux();
+//void INsCmpInv(); 
+//void INsCmpVis();
+//void INsCmpUnstead(); 
+//void INsCmpSrc(); 
+//void INsMomPre(); 
+//void INsCmpFaceflux(); 
+//void INsCorrectPresscoef(); 
+//void INsCmpPressCorrectEquandUpdatePress();  
+//void INsCmpSpeedCorrectandUpdateSpeed();  
+//void INsUpdateFaceflux();   
+//void INsUpdateRes();
 
 EndNameSpace

@@ -5,7 +5,7 @@
 #include "stdlib.h"
 #include "solution.h"
 #include "systemSolver.h"
-//#include<crtdbg.h>
+#include<crtdbg.h>
 
 using namespace std;
 /** ************************************************************************
@@ -23,12 +23,9 @@ void Update
 (Double** H,         //<! The upper diagonal matrix constructed in the GMRES routine.
 	Approximation* x,   //<! The current approximation to the linear system.
 	Double** s,          //<! The vector e_1 that has been multiplied by the Givens rotations.
-	std::vector<Approximation>* v,  //<! The orthogonal basis vectors for the Krylov subspace.
+	std::vector<Approximation*> v,  //<! The orthogonal basis vectors for the Krylov subspace.
 	int dimension)      //<! The number of vectors in the basis for the Krylov subspace.
 {
-	// Solve for the coefficients, i.e. solve for c in
-	// H*c=s, but we do it in place.
-	// The calculation is made separately here
 	int lupe;
 	int i;
 	for (i = 0; i < Rank.COLNUMBER; i++)
@@ -38,14 +35,12 @@ void Update
 			s[lupe][i] = s[lupe][i] / H[lupe][lupe];
 			for (int innerLupe = lupe - 1; innerLupe >= 0; innerLupe--)
 			{
-				// Subtract off the parts from the upper diagonal of the
-				// matrix.
 				s[innerLupe][i] -= s[lupe][i] * H[innerLupe][lupe];
 			}
 		}
 	}
 	// Finally update the approximation.
-	typename std::vector<Approximation>::iterator ptr = v->begin();
+	typename std::vector<Approximation*>::iterator ptr = v.begin();
 	for (int xcol = 0; xcol < Rank.COLNUMBER; xcol++)
 	{
 		for (int lupe = Rank.RANKNUMBER - 1; lupe >= 0; lupe--)
@@ -54,7 +49,7 @@ void Update
 			{
 				for (int i = Rank.COLNUMBER - 1; i >= 0; i--)
 				{
-					(*x)(lupe, xcol) += (*(ptr + m))(lupe, i) * s[Rank.COLNUMBER * m + i][xcol];
+					(*x)(lupe, xcol) += (*(*(ptr + m)))(lupe, i) * s[Rank.COLNUMBER * m + i][xcol];
 				}
 			}
 		}
@@ -82,26 +77,18 @@ int GMRES
 	Double tolerance          //!< How small the residual should be to terminate the GMRES iterations.
 )
 {
-
-	// Allocate the space for the givens rotations, and the upper
-	// Hessenburg matrix.
 	Double** H = ArrayUtils<Double>::twotensor((krylovDimension + 1) * Rank.COLNUMBER, krylovDimension * Rank.COLNUMBER);
-	/*cout << H[1][9] << endl;*/
-	// The Givens rotations include the sine and cosine term. The
-	// cosine term is in column zero, and the sine term is in column
-	// one.
 	Double** givens = ArrayUtils<Double>::twotensor(Rank.COLNUMBER * (krylovDimension + 1), krylovDimension * Rank.COLNUMBER);
 
 	Double** s = ArrayUtils<Double>::twotensor((krylovDimension + 1) * Rank.COLNUMBER, Rank.COLNUMBER);
-	Double** S = ArrayUtils<Double>::twotensor(Rank.COLNUMBER, Rank.COLNUMBER);  //To take the last three rows of the S matrix
+	Double** S = ArrayUtils<Double>::twotensor(Rank.COLNUMBER, Rank.COLNUMBER);  
 	Double** R = ArrayUtils<Double>::twotensor(Rank.COLNUMBER, Rank.COLNUMBER);
 	// Determine the residual and allocate the space for the Krylov
 	// subspace.
-	std::vector<Approximation> V(krylovDimension + 1,
-		Approximation(solution->getN()));
+	std::vector<Approximation*> V(krylovDimension + 1);
+	V[0] = new Approximation(Rank.RANKNUMBER);
 	(*residual) = precond->solve2((*rhs) - (*linearization) * (*solution));
 
-	//First column vector of residuals
 	Double normr1;
 	double temp = 0.0;
 	for (int ia = 0; ia < Rank.RANKNUMBER; ia++)
@@ -128,7 +115,7 @@ int GMRES
 		// The first QR decomposition, and get the vector V[0], V[1], V[2]
 		for (int ib = 0; ib < Rank.RANKNUMBER; ib++)
 		{
-			(V[0])(ib, 0) = (*residual)(ib, 0) * (1.0 / normr1);    //Unites the first column of the first V vector, v1
+			(*V[0])(ib, 0) = (*residual)(ib, 0) * (1.0 / normr1);
 		}
 
 		R[0][0] = normr1;
@@ -139,22 +126,22 @@ int GMRES
 				R[j][ic] = 0.0;
 				for (int k = 0; k < Rank.RANKNUMBER; k++)
 				{
-					R[j][ic] += (V[0])(k, j) * (*residual)(k, ic);
+					R[j][ic] += (*V[0])(k, j)*(*residual)(k, ic);
 				}
 				for (int m = 0; m < Rank.RANKNUMBER; m++)
 				{
-					(V[0])(m, ic) += (V[0])(m, j) * R[j][ic];
+					(*V[0])(m, ic) += (*V[0])(m, j) * R[j][ic];
 				}
 			}
 			for (int n = 0; n < Rank.RANKNUMBER; n++)
 			{
-				(V[0])(n, ic) = (*residual)(n, ic) - (V[0])(n, ic);
-				R[ic][ic] += V[0](n, ic) * V[0](n, ic);
+				(*V[0])(n, ic) = (*residual)(n, ic) - (*V[0])(n, ic);
+				R[ic][ic] += (*V[0])(n, ic) * (*V[0])(n, ic);
 			}
 			R[ic][ic] = sqrt(R[ic][ic]);
 			for (int n = 0; n < Rank.RANKNUMBER; n++)
 			{
-				V[0](n, ic) = V[0](n, ic) * (1 / R[ic][ic]);
+				(*V[0])(n, ic) = (*V[0])(n, ic) * (1 / R[ic][ic]);
 			}
 		}
 
@@ -176,13 +163,11 @@ int GMRES
 		// for the Krylov subspace.
 		for (iteration = 0; iteration < krylovDimension; ++iteration)
 		{
-			// Get the next entry in the vectors that form the basis for
-			// the Krylov subspace.
-			V[iteration + 1] = precond->solve2((*linearization) * V[iteration]);
-			// Perform the modified Gram-Schmidt method to orthogonalize
-			// the new vector.
+			V[iteration + 1] = new Approximation(Rank.RANKNUMBER);
+			*V[iteration + 1] = precond->solve2((*linearization)*(*V[iteration]));
+
 			int row;
-			typename std::vector<Approximation>::iterator ptr = V.begin();
+			typename std::vector<Approximation*>::iterator ptr = V.begin();
 			for (int id = 0; id < Rank.COLNUMBER; id++)
 			{
 				for (row = 0; row <= Rank.COLNUMBER * iteration + Rank.COLNUMBER - 1; row++)
@@ -193,7 +178,7 @@ int GMRES
 						int quo = 0;
 						mod = row % Rank.COLNUMBER;
 						quo = row / Rank.COLNUMBER;
-						H[row][Rank.COLNUMBER * iteration + id] += (V[iteration + 1])(n, id) * (*(ptr + quo))(n, mod);
+						H[row][Rank.COLNUMBER * iteration + id] += (*V[iteration + 1])(n, id) * (*(*(ptr + quo)))(n, mod);
 					}
 				}
 				//subtract H[row][iteration]*V[row] from the current vector
@@ -204,26 +189,25 @@ int GMRES
 						double tem = 0.0;
 						for (int j = 0; j < Rank.COLNUMBER; j++)
 						{
-							tem += (*(ptr + row))(n, j) * H[Rank.COLNUMBER * row + j][Rank.COLNUMBER * iteration + id];
+							tem += (*(*(ptr + row)))(n, j) * H[Rank.COLNUMBER * row + j][Rank.COLNUMBER * iteration + id];
 						}
-						(V[iteration + 1])(n, id) = (V[iteration + 1])(n, id) - tem;
+						(*V[iteration + 1])(n, id) = (*V[iteration + 1])(n, id) - tem;
 					}
 				}
 			}
 
-			// The unitization process of QR decomposition to get h [iteration + 1] [iteration], v [iteration + 1]
-			std::vector<Approximation> TV(1, Approximation(solution->getN()));   //Temporary variable
-			TV[0] = V[iteration + 1];
+			std::vector<Approximation> TV(1, Approximation(solution->getN()));   
+			TV[0] = *V[iteration + 1];
 			Double normr2;
 			double t = 0.0;
 			for (int lupe = 0; lupe < Rank.RANKNUMBER; lupe++)
 			{
-				t += (V[iteration + 1])(lupe, 0) * (V[iteration + 1])(lupe, 0);
+				t += (*V[iteration + 1])(lupe, 0)*(*V[iteration + 1])(lupe, 0);
 			}
 			normr2 = sqrt(t);
 			for (row = 0; row < Rank.RANKNUMBER; row++)
 			{
-				(V[iteration + 1])(row, 0) = (V[iteration + 1])(row, 0) * (1.0 / normr2);
+				(*V[iteration + 1])(row, 0) = (*V[iteration + 1])(row, 0) * (1.0 / normr2);
 			}
 			H[Rank.COLNUMBER * (iteration + 1)][Rank.COLNUMBER * iteration] = normr2;
 			for (int p = 1; p < Rank.COLNUMBER; p++)
@@ -232,31 +216,27 @@ int GMRES
 				{
 					for (int k = 0; k < Rank.RANKNUMBER; k++)
 					{
-						H[Rank.COLNUMBER * (iteration + 1) + q][Rank.COLNUMBER * iteration + p] += (V[iteration + 1])(k, q) * (TV[0])(k, p);
+						H[Rank.COLNUMBER * (iteration + 1) + q][Rank.COLNUMBER * iteration + p] += (*V[iteration + 1])(k, q) * (TV[0])(k, p);
 					}
 					for (int m = 0; m < Rank.RANKNUMBER; m++)
 					{
-						(V[iteration + 1])(m, p) = 0.0;
-						(V[iteration + 1])(m, p) += (V[iteration + 1])(m, q) * H[Rank.COLNUMBER * (iteration + 1) + q][Rank.COLNUMBER * iteration + p];
+						(*V[iteration + 1])(m, p) = 0.0;
+						(*V[iteration + 1])(m, p) += (*V[iteration + 1])(m, q) * H[Rank.COLNUMBER * (iteration + 1) + q][Rank.COLNUMBER * iteration + p];
 					}
 				}
 				for (int n = 0; n < Rank.RANKNUMBER; n++)
 				{
-					(V[iteration + 1])(n, p) = (TV[0])(n, p) - (V[iteration + 1])(n, p);
-					H[Rank.COLNUMBER * (iteration + 1) + p][Rank.COLNUMBER * iteration + p] += V[iteration + 1](n, p) * V[iteration + 1](n, p);
+					(*V[iteration + 1])(n, p) = (TV[0])(n, p) - (*V[iteration + 1])(n, p);
+					H[Rank.COLNUMBER * (iteration + 1) + p][Rank.COLNUMBER * iteration + p] += (*V[iteration + 1])(n, p) * (*V[iteration + 1])(n, p);
 				}
 				H[Rank.COLNUMBER * (iteration + 1) + p][Rank.COLNUMBER * iteration + p] = sqrt(H[Rank.COLNUMBER * (iteration + 1) + p][Rank.COLNUMBER * iteration + p]);
 				for (int n = 0; n < Rank.RANKNUMBER; n++)
 				{
-					(V[iteration + 1])(n, p) = (V[iteration + 1])(n, p) * (1 / H[Rank.COLNUMBER * (iteration + 1) + p][Rank.COLNUMBER * iteration + p]);
+					(*V[iteration + 1])(n, p) = (*V[iteration + 1])(n, p) * (1 / H[Rank.COLNUMBER * (iteration + 1) + p][Rank.COLNUMBER * iteration + p]);
 				}
 			}
 			std::vector<Approximation>(TV).swap(TV);
 
-			// Apply the Givens Rotations to insure that H is
-			// an upper diagonal matrix. First apply previous
-			// rotations to the current matrix.
-			// the first Givens Rotations
 			double tmp = 0.0;
 			int col;
 			for (int lupe = 0; lupe < Rank.COLNUMBER; lupe++)
@@ -273,33 +253,23 @@ int GMRES
 							+ givens[tp][2 * (tp - mp)] * H[tp + 1][col];
 						H[tp][col] = tmp;
 					}
-					// Figure out the next Givens rotation.
 					if (H[col + Rank.COLNUMBER - lupe][col] == 0.0)
 					{
-						// It is already lower diagonal. Just leave it be....
 						givens[col + Rank.COLNUMBER - 1 - lupe][col * 2] = 1.0;
 						givens[col + Rank.COLNUMBER - 1 - lupe][1 + col * 2] = 0.0;
 					}
 					else if (fabs(H[col + Rank.COLNUMBER - lupe][col]) > fabs(H[col + Rank.COLNUMBER - 1 - lupe][col]))
 					{
-						// The off diagonal entry has a larger
-						// magnitude. Use the ratio of the
-						// diagonal entry over the off diagonal.
 						tmp = H[col + Rank.COLNUMBER - 1 - lupe][col] / H[col + Rank.COLNUMBER - lupe][col];
 						givens[col + Rank.COLNUMBER - 1 - lupe][1 + col * 2] = 1.0 / sqrt(1.0 + tmp * tmp);
 						givens[col + Rank.COLNUMBER - 1 - lupe][col * 2] = tmp * givens[col + Rank.COLNUMBER - 1 - lupe][1 + col * 2];
 					}
 					else
 					{
-						// The off diagonal entry has a smaller
-						// magnitude. Use the ratio of the off
-						// diagonal entry to the diagonal entry.
 						tmp = H[col + Rank.COLNUMBER - lupe][col] / H[col + Rank.COLNUMBER - 1 - lupe][col];
 						givens[col + Rank.COLNUMBER - 1 - lupe][col * 2] = 1.0 / sqrt(1.0 + tmp * tmp);
 						givens[col + Rank.COLNUMBER - 1 - lupe][1 + col * 2] = tmp * givens[col + Rank.COLNUMBER - 1 - lupe][col * 2];
 					}
-					// Apply the new Givens rotation on the
-					// new entry in the uppper Hessenberg matrix.
 					tmp = givens[col + Rank.COLNUMBER - 1 - lupe][col * 2] * H[col + Rank.COLNUMBER - 1 - lupe][col] +
 						givens[col + Rank.COLNUMBER - 1 - lupe][1 + col * 2] * H[col + Rank.COLNUMBER - lupe][col];
 					H[col + Rank.COLNUMBER - lupe][col] = -givens[col + Rank.COLNUMBER - 1 - lupe][1 + col * 2] * H[col + Rank.COLNUMBER - 1 - lupe][col] +
@@ -308,8 +278,6 @@ int GMRES
 					if (H[col + Rank.COLNUMBER - lupe][col] < 1e-10)
 						H[col + Rank.COLNUMBER - lupe][col] = 0;
 
-					// Finally apply the new Givens rotation on the s
-					// vector
 					for (int z = 0; z < Rank.COLNUMBER; z++)
 					{
 						tmp = givens[col + Rank.COLNUMBER - 1 - lupe][col * 2] * s[col + Rank.COLNUMBER - 1 - lupe][z] + givens[col + Rank.COLNUMBER - 1 - lupe][1 + col * 2] * s[col + Rank.COLNUMBER - lupe][z];
@@ -318,7 +286,6 @@ int GMRES
 					}
 				}
 			}
-			//The last three lines of the s vector group are stored in the s vector group so that the norm can be calculated later
 			int lupe, innerlupe;
 			for (lupe = 0; lupe < Rank.COLNUMBER; lupe++)
 			{
@@ -328,7 +295,6 @@ int GMRES
 				}
 			}
 
-			/*int row;*/
 			int im;
 			int in;
 			rho = 0.0;
@@ -339,16 +305,14 @@ int GMRES
 				}
 			rho = sqrt(rho);
 
-			//cout << "iteration:" << iteration << "residual:" << rho << endl;
-			/*ofstream file2("residual.txt", ios::app);
-			file2 << "residual:" << rho << endl;
-			file2.close();*/
+			//residual test
+			ofstream resss("GMRES_res.txt", ios::app);
+			resss << rho << endl;
+			resss.close();
 
-			//cout << tolerance * normRHS << endl;
-			if (rho < tolerance * normRHS)   //Is this method effective in bgmres
+			if (rho < tolerance * normRHS)   
 			{
-				// We are close enough! Update the approximation.
-				Update(H, solution, s, &V, iteration);
+				Update(H, solution, s, V, iteration);
 				(*residual) = precond->solve2((*linearization) * (*solution) - (*rhs));      
 				Rank.residual = residual->norm();
 				ArrayUtils<double>::deltwotensor(givens);
@@ -356,7 +320,7 @@ int GMRES
 				ArrayUtils<double>::deltwotensor(s);
 				ArrayUtils<double>::deltwotensor(S);
 				ArrayUtils<double>::deltwotensor(R);
-				std::vector<Approximation>().swap(V);
+				std::vector<Approximation*>().swap(V);
 				//delete [] V;
 				//tolerance = rho/normRHS;
 				return(iteration + totalRestarts * krylovDimension);
@@ -364,14 +328,11 @@ int GMRES
 
 		} // for(iteration)
 
-		// We have exceeded the number of iterations. Update the
-		// approximation and start over.
 		totalRestarts += 1;
-		Update(H, solution, s, &V, iteration - 1);
-		(*residual) = precond->solve2((*linearization) * (*solution) - (*rhs));      //The third precond
+		Update(H, solution, s, V, iteration - 1);
+		(*residual) = precond->solve2((*linearization) * (*solution) - (*rhs));      
 		Rank.residual = residual->norm();
 
-		//cout << "totalRestarts:" << totalRestarts << endl;
 	} // while(numberRestarts,rho)
 
 
@@ -380,7 +341,7 @@ int GMRES
 	ArrayUtils<double>::deltwotensor(s);
 	ArrayUtils<double>::deltwotensor(S);
 	ArrayUtils<double>::deltwotensor(R);
-	std::vector<Approximation>().swap(V);
+	std::vector<Approximation*>().swap(V);
 	//delete [] V;
 	//tolerance = rho/normRHS;
 
