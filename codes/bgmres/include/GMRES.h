@@ -100,13 +100,11 @@ int GMRES
 	Double rho = residual->norm();
 	Rank.residual = rho;
 
-	// variable for keeping track of how many restarts had to be used.
 	int totalRestarts = 0;
 
 	if (normRHS < 1.0E-5)
 		normRHS = 1.0;
 
-	// Go through the requisite number of restarts.
 	int iteration = 1;
 	while ((numberRestarts-- >= 0) && (rho > tolerance * normRHS))
 	{
@@ -235,7 +233,7 @@ int GMRES
 					(*V[iteration + 1])(n, p) = (*V[iteration + 1])(n, p) * (1 / H[Rank.COLNUMBER * (iteration + 1) + p][Rank.COLNUMBER * iteration + p]);
 				}
 			}
-			std::vector<Approximation>(TV).swap(TV);
+			std::vector<Approximation>().swap(TV);
 
 			double tmp = 0.0;
 			int col;
@@ -320,9 +318,16 @@ int GMRES
 				ArrayUtils<double>::deltwotensor(s);
 				ArrayUtils<double>::deltwotensor(S);
 				ArrayUtils<double>::deltwotensor(R);
+				givens = NULL;
+				H = NULL;
+				s = NULL;
+				S = NULL;
+				R = NULL;
+				for (int i = 0; i < krylovDimension + 1; i++)
+				{
+					delete V[i];
+				}
 				std::vector<Approximation*>().swap(V);
-				//delete [] V;
-				//tolerance = rho/normRHS;
 				return(iteration + totalRestarts * krylovDimension);
 			}
 
@@ -341,9 +346,16 @@ int GMRES
 	ArrayUtils<double>::deltwotensor(s);
 	ArrayUtils<double>::deltwotensor(S);
 	ArrayUtils<double>::deltwotensor(R);
+	givens = NULL;
+	H = NULL;
+	s = NULL;
+	S = NULL;
+	R = NULL;
+	for (int i = 0; i < krylovDimension + 1; i++)
+	{
+		delete V[i];
+	}
 	std::vector<Approximation*>().swap(V);
-	//delete [] V;
-	//tolerance = rho/normRHS;
 
 	if (rho < tolerance * normRHS)
 		return(0);

@@ -20,7 +20,7 @@ Poisson::Poisson(int number, int ranknumber)
 	A  = ArrayUtils<double>::onetensor(number);
 	IA = ArrayUtils<int>::onetensor(ranknumber + 1);
 	JA = ArrayUtils<int>::onetensor(number);
-	coeMatrix(A,IA,JA);  //按行存储方法
+	coeMatrix(A,IA,JA);  
 }
 
 
@@ -45,9 +45,7 @@ double& Poisson::operator()(int row)
 	return(A[row]);
 }
 
-/**
- * 对应coeMatrix压缩函数
-*/
+
 Solution Poisson::operator*(class Solution vector)
 {
 	
@@ -56,8 +54,6 @@ Solution Poisson::operator*(class Solution vector)
 	double data;
 	double** tmp = ArrayUtils<double>::twotensor(Rank.RANKNUMBER, Rank.COLNUMBER);
 	Solution result;
-	// the first and last row just return the same values, so 
-	// there is no need to define the results from that row.
 	
 	for( i = 1; i <= Rank.RANKNUMBER; i++)               
 	{
@@ -69,11 +65,11 @@ Solution Poisson::operator*(class Solution vector)
 				data = A[col];
 				tmp[i-1][j] += data * vector(b,j);
 				result.setEntry(tmp[i-1][j],i-1,j);
-				/*cout << tmp[a-1][j] << endl;*/
 			}
 		}
 	}
 	ArrayUtils<double>::deltwotensor(tmp);
+	tmp = NULL;
 	return(result);
 }
 

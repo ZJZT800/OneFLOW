@@ -13,7 +13,6 @@ public:
 	Preconditioner(const Preconditioner& oldCopy);  //< Constructor for making a copy/duplicate
 	~Preconditioner();                              //< Destructor for the class
 
-	Solution solve(const Solution &vector);    //< Method to solve the
 	Solution solve2(const Solution &vector);																					 //< system associated with
 																						 //< the preconditioner.
 
