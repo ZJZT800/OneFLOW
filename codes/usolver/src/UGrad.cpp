@@ -120,7 +120,7 @@ void CalcINsGrad(RealField & q, RealField & dqdx, RealField & dqdy, RealField & 
 		dqdy[cId] /= vol;
 		dqdz[cId] /= vol;
 	}
-        
+
 }
 
 
