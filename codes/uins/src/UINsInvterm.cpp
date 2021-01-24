@@ -201,11 +201,11 @@ void UINsInvterm::CalcINsPreflux()
 				{
 					iinv.rf = iinv.rl;
 
-					iinv.uf[fId] = iinv.ul;
+					iinv.uf[fId] = 0;
 
-					iinv.vf[fId] = iinv.vl;
+					iinv.vf[fId] = 0;
 
-					iinv.wf[fId] = iinv.wl;
+					iinv.wf[fId] = 0;
 
 					iinv.pf[fId] = iinv.pl;
 
@@ -852,26 +852,7 @@ void UINsInvterm::CalcUpdateINsBcFaceflux()
 
 	else if (ug.bctype == BC::SYMMETRY)
 	{
-		Real dupf, dvpf, dwpf;
-		dupf = (*ug.cvol)[ug.lc] / iinv.dup[ug.lc];
-		dvpf = (*ug.cvol)[ug.lc] / iinv.dup[ug.lc];
-		dwpf = (*ug.cvol)[ug.lc] / iinv.dup[ug.lc];
-		Real Df1 = dupf * (*ug.a1)[ug.fId];
-		Real Df2 = dvpf * (*ug.a2)[ug.fId];
-		Real Df3 = dwpf * (*ug.a3)[ug.fId];
-
-		Real l2rdx = (*ug.xfc)[ug.fId] - (*ug.xcc)[ug.lc];
-		Real l2rdy = (*ug.yfc)[ug.fId] - (*ug.ycc)[ug.lc];
-		Real l2rdz = (*ug.zfc)[ug.fId] - (*ug.zcc)[ug.lc];
-
-		Real Df = Df1 * (*ug.a1)[ug.fId] + Df2 * (*ug.a2)[ug.fId] + Df3 * (*ug.a3)[ug.fId];
-
-		Real dist = l2rdx * (*ug.a1)[ug.fId] + l2rdy * (*ug.a2)[ug.fId] + l2rdz * (*ug.a3)[ug.fId];
-
-		iinv.rf = (*uinsf.q)[IIDX::IIR][ug.lc];
-
-		iinv.fux = iinv.rf * Df / dist * (iinv.pp[ug.lc] - iinv.ppf[ug.fId]);
-		iinv.fq[ug.fId] = iinv.fq[ug.fId] + iinv.fux;
+		iinv.fq[ug.fId] = 0;
 	}
 
 }
@@ -961,11 +942,11 @@ void UINsInvterm::CalcDun()
 
 		else if (ug.bctype == BC::SYMMETRY)
 		{
-			iinv.uf[ug.fId] = (*uinsf.q)[IIDX::IIU][ug.lc] - (*ug.cvol)[ug.lc] / iinv.dup[ug.lc] * iinv.dppbdx[ug.fId];
+			iinv.uf[ug.fId] = 0;
 
-			iinv.vf[ug.fId] = (*uinsf.q)[IIDX::IIV][ug.lc] - (*ug.cvol)[ug.lc] / iinv.dup[ug.lc] * iinv.dppbdy[ug.fId];
+			iinv.vf[ug.fId] = 0;
 
-			iinv.wf[ug.fId] = (*uinsf.q)[IIDX::IIW][ug.lc] - (*ug.cvol)[ug.lc] / iinv.dup[ug.lc] * iinv.dppbdz[ug.fId];
+			iinv.wf[ug.fId] = 0;
 		}
 
 		(*uinsf.q)[IIDX::IIR][ug.rc] = iinv.rf;
