@@ -3,10 +3,12 @@ int  manufacturedInflowType = 1; // 1 - 等熵涡; 2 - Euler制造解; 3 - Couette Flo
 Real inflowVelocity         = 1;
 
 //cavity condition
+Real chara_length = 1；
+Real k_vis = 0.001；    //k_vs=chara_length *rho*V/reynolds
 Real mach_ref        =  0.2;
 Real aoa_degree      =  0.0;
 Real sideslip_degree =  0.0;
-Real reynolds        =  100.0;
+Real reynolds        =  1000;
 
 Real lref =  1.0;    //nondimensional
 Real aref =  1.0;    //nondimensional
