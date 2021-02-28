@@ -105,7 +105,7 @@ public:
 public:
 	void CalcINsinvFlux();
 	void CalcINsBcinvFlux();
-	void CalcINsinvTerm();
+	void CalcINsinvTerm(RealField& dudx, RealField& dudy, RealField& dudz, RealField& dvdx, RealField& dvdy, RealField& dvdz, RealField& dwdx, RealField& dwdy, RealField& dwdz);
 	void CalcINsBcinvTerm();
 	void CalcINsFaceflux(RealField & dpdx, RealField & dpdy, RealField & dpdz);
 	void CalcINsBcFaceflux(RealField& dpdx, RealField& dpdy, RealField& dpdz);

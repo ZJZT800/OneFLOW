@@ -298,7 +298,7 @@ void UINsInvterm::CalcInvMassFlux()
 {
 	InitInv();
 
-	/*RealField dudx, dudy, dudz;
+	RealField dudx, dudy, dudz;
 	RealField dvdx, dvdy, dvdz;
 	RealField dwdx, dwdy, dwdz;
 
@@ -314,7 +314,7 @@ void UINsInvterm::CalcInvMassFlux()
 
 	ONEFLOW::CalcINsGrad(iinv.uf, dudx, dudy, dudz);
 	ONEFLOW::CalcINsGrad(iinv.vf, dvdx, dvdy, dvdz);
-	ONEFLOW::CalcINsGrad(iinv.wf, dwdx, dwdy, dwdz);*/
+	ONEFLOW::CalcINsGrad(iinv.wf, dwdx, dwdy, dwdz);
 
 	for(int fId = 0; fId < ug.nBFace; fId++)
 	{
@@ -336,7 +336,7 @@ void UINsInvterm::CalcInvMassFlux()
 		INsExtractr(*uinsf.q, iinv.rr, iinv.ur, iinv.vr, iinv.wr, iinv.pr);
 
 
-		this->CalcINsinvTerm();
+		this->CalcINsinvTerm(dudx, dudy, dudz, dvdx, dvdy, dvdz, dwdx, dwdy, dwdz);
 	}
 
 }
