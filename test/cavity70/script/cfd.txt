@@ -49,6 +49,8 @@ int time_integral      =  3;      //1--RK; 2--LU-SGS; 3--SIMPLE
 int rk_stage             =  1;
 int linearTwoStepMethods  =  1;      //1--BDF1; 2--C-N; 1--BDF2;
 
+int conv_ischeme = 1; // 1 SOU  2 QUICK
+
 int ischeme   = 1; //1 roe 2 vanleer 3 steger 4 hlle 5 lax 6 ausmp 7 ausmp+ 8 ausmdv 9 ausmw 10 ausmpw
 int ivischeme = 0; //0 std 1 aver 2 test 3 new1 4 new2 
 int ieigenfix = 1;
