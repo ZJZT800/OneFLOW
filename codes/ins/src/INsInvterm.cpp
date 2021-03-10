@@ -157,6 +157,21 @@ void INsInvterm::CalcINsinvTerm(RealField& dudx, RealField& dudy, RealField& dud
 	else if (conv_ischeme == 2)
 	{
 
+		Real c11 = (MAX(0, -iinv.fq[ug.fId]) + (*ug.fl)[ug.fId] * iinv.fq[ug.fId]);
+		Real c1 = c11 * (iinv.ur - iinv.ul);
+		iinv.buc[ug.lc] -= c1;
+		iinv.buc[ug.rc] += c1;
+		c1 = c11 * (iinv.vr - iinv.vl);
+		iinv.bvc[ug.lc] -= c1;
+		iinv.bvc[ug.rc] += c1;
+		c1 = c11 * (iinv.wr - iinv.wl);
+		iinv.bwc[ug.lc] -= c1;
+		iinv.bwc[ug.rc] += c1;
+	}
+
+	/*else if (conv_ischeme == 2)
+	{
+
 		Real l2rdx = (*ug.xcc)[ug.rc] - (*ug.xcc)[ug.lc];
 		Real l2rdy = (*ug.ycc)[ug.rc] - (*ug.ycc)[ug.lc];
 		Real l2rdz = (*ug.zcc)[ug.rc] - (*ug.zcc)[ug.lc];
@@ -199,7 +214,7 @@ void INsInvterm::CalcINsinvTerm(RealField& dudx, RealField& dudy, RealField& dud
 			iinv.bwc[ug.lc] -= c1;
 			iinv.bwc[ug.rc] += c1;
 		}
-	}
+	}*/
 }
 
 void INsInvterm::CalcINsBcinvTerm()

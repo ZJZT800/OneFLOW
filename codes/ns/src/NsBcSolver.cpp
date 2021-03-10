@@ -393,6 +393,12 @@ void NsBcSolver::SymmetryBc()
     nscom.primt2[ IDX::IU ] = nscom.prims2[ IDX::IU ] - two * gcom.xfn * vnRelative2;
     nscom.primt2[ IDX::IV ] = nscom.prims2[ IDX::IV ] - two * gcom.yfn * vnRelative2;
     nscom.primt2[ IDX::IW ] = nscom.prims2[ IDX::IW ] - two * gcom.zfn * vnRelative2;
+
+	for (int iEqu = 0; iEqu < nscom.nTEqu; ++iEqu)
+	{
+		nscom.prim[iEqu] = half * (nscom.prims1[iEqu] + nscom.primt1[iEqu]);
+	}
+
 }
 
 void NsBcSolver::OversetBc()
